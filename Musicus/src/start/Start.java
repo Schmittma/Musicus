@@ -11,6 +11,8 @@ import utils.ImageConverter;
 
 public class Start implements Runnable{
 
+	public static final boolean DEBUG = true;
+	
 	public static void main(String[] args) {
 		
 		File f1 = new File("C:\\Users\\Marius\\Musicus\\Musicus\\data\\OdeToJoy.png");
@@ -20,7 +22,8 @@ public class Start implements Runnable{
 			//Read first image
 			BufferedImage bi = ImageIO.read(f1);
 			Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
-			ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File("C:\\Users\\Marius\\Musicus\\Musicus\\data\\OdeToJoy_Reconverted.png"));
+			
+			if(DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File("C:\\Users\\Marius\\Musicus\\Musicus\\data\\OdeToJoy_Reconverted.png"));
 			
 			//Start the mainthread
 			Start instance = new Start(odeToJoy);

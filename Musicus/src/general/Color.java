@@ -1,5 +1,7 @@
 package general;
 
+import utils.UtilMath;
+
 public class Color {
 
 	private int red;
@@ -7,6 +9,11 @@ public class Color {
 	private int blue;
 	private int alpha;
 	
+	enum GRAYSCALE{
+		LIGHTNESS,
+		AVERAGE,
+		LUMINOSITY
+	}
 	
 	
 	public Color(int red, int green, int blue, int alpha) {
@@ -63,7 +70,18 @@ public class Color {
 	public void setAlpha(int alpha) {
 		this.alpha = alpha;
 	}
-
 	
+	// Grayscale algorithms originated from: https://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
+	public int getGrayscale(GRAYSCALE type) {
+		switch(type) {
+		case LIGHTNESS:
+			return (UtilMath.max(this.red, this.green, this.blue) + UtilMath.min(this.red, this.blue, this.green)) / 2;
+		case LUMINOSITY:
+			return (int)(0.21 * this.red + 0.72 * this.green + 0.07 * this.blue);
+		case AVERAGE:
+		default:
+			return (this.red + this.green + this.blue) / 3;
+		}
+	}
 	
 }
