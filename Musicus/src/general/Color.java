@@ -9,7 +9,7 @@ public class Color {
 	private int blue;
 	private int alpha;
 	
-	enum GRAYSCALE{
+	public static enum Grayscale{
 		LIGHTNESS,
 		AVERAGE,
 		LUMINOSITY
@@ -72,7 +72,7 @@ public class Color {
 	}
 	
 	// Grayscale algorithms originated from: https://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
-	public int getGrayscale(GRAYSCALE type) {
+	public int getGrayscale(Grayscale type) {
 		switch(type) {
 		case LIGHTNESS:
 			return (UtilMath.max(this.red, this.green, this.blue) + UtilMath.min(this.red, this.blue, this.green)) / 2;

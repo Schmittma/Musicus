@@ -42,4 +42,23 @@ public final class ImageConverter {
 		
 		return ret;
 	}
+	
+	public static BufferedImage BinaryImageToBuffered(boolean[][] inputImage) {
+		BufferedImage ret = new BufferedImage(inputImage.length, inputImage[0].length, BufferedImage.TYPE_BYTE_GRAY);
+		
+		for(int x = 0; x < inputImage.length; x++) {
+			for(int y = 0; y < inputImage[x].length; y++) {
+				if(inputImage[x][y]) {
+					ret.setRGB(x, y, 0);
+				}
+				else {
+					ret.setRGB(x, y, 0xffffffff);
+				}
+				
+			}
+		}
+		
+		return ret;
+		
+	}
 }
