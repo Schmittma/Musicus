@@ -6,8 +6,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import binarization.GTBinarization;
-import binarization.SauvoldaBinarization;
+import binarization.NiblackBinarization;
 import general.Color;
 import interfaces.Binarization;
 import utils.ImageConverter;
@@ -52,11 +51,10 @@ public class Start implements Runnable{
 	//Main Thread
 	public void run() {
 		
-		int window_size = 7;
-		double range = 127.0;
-		double weight = 0.2;
+		int window_size = 15;
+		double weight = -0.2;
 		
-		Binarization binarization = new SauvoldaBinarization(window_size, weight, range);
+		Binarization binarization = new NiblackBinarization(window_size, weight);
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
 		if(DEBUG) {
