@@ -11,8 +11,8 @@ public class NiblackBinarization implements Binarization {
 	
 	public NiblackBinarization(int window_size, double weight) {
 		this.window_size = window_size;
-		if( window_size % 2 == 0){ 	//Ensure that the window size is odd
-			window_size+=1;
+		if( this.window_size % 2 == 0){ 	//Ensure that the window size is odd
+			this.window_size+=1;
 		}
 		this.weight = weight;
 	}
@@ -29,6 +29,7 @@ public class NiblackBinarization implements Binarization {
 				
 				int threshold = (int) (m + weight * s);
 				binaryImage[x][y] = imageRGB[x][y].getGrayscale(Grayscale.AVERAGE) < threshold;
+				
 			}
 		}
 		
@@ -39,20 +40,21 @@ public class NiblackBinarization implements Binarization {
 	private double calculateMeanInWindow(Color[][] pixels, int centerX, int centerY, int w){	
 		double mean = 0;
 		int numOfPixels = w*w;
-		
-		for (int y = centerY - (w/2); y <= centerY + (w/2); y++) {
-			if( y < 0 || y >= pixels.length){
-				numOfPixels -= w;
+		for (int x = centerX - (w/2); x <= centerX + (w/2); x++) {
+			if( x < 0 || x >= pixels.length){
+				numOfPixels -= w; //One row less in the mean calculation
+				System.out.println("X out of bounds");
 				continue;
 			}
 				
-			for (int x = centerX - (w/2); x <= centerX + (w/2); x++) {
-				if(x < 0 || x >= pixels[0].length){
+			for (int y = centerY - (w/2); y <= centerY + (w/2); y++) {
+				if(y < 0 || y >= pixels[x].length){
 					numOfPixels -= 1; //One pixel less in the mean calcualation
+					System.out.println("Y out of bounds");
 					continue;
 				}
 				
-				mean += pixels[y][x].getGrayscale(Grayscale.AVERAGE); //Sum all the viable pixels
+				mean += pixels[x][y].getGrayscale(Grayscale.AVERAGE); //Sum all the viable pixels
 			}
 		}
 		return mean / (double)numOfPixels;
@@ -63,19 +65,19 @@ public class NiblackBinarization implements Binarization {
 		
 		double sumOfErrors = 0;
 		
-		for (int y = centerY - (w/2); y <= centerY + (w/2); y++) {
-			if( y < 0 || y >= pixels.length){
+		for (int x = centerX - (w/2); x <= centerX + (w/2); x++) {
+			if( x < 0 || x >= pixels.length){
 				numOfPixels -= w;
 				continue;
 			}
 				
-			for (int x = centerX - (w/2); x <= centerX + (w/2); x++) {
-				if(x < 0 || x >= pixels[0].length){
+			for (int y = centerY - (w/2); y <= centerY + (w/2); y++) {
+				if(y < 0 || y >= pixels[0].length){
 					numOfPixels -= 1; //One pixel less in the mean calcualation
 					continue;
 				}
 				
-				sumOfErrors += Math.pow(pixels[y][x].getGrayscale(Grayscale.AVERAGE) - mean, 2); //Sum all the viable pixels
+				sumOfErrors += Math.pow(pixels[x][y].getGrayscale(Grayscale.AVERAGE) - mean, 2); //Sum all the viable pixels
 			}
 		}
 		
