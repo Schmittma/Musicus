@@ -3,12 +3,15 @@ package start;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
 import binarization.NiblackBinarization;
 import general.Color;
 import interfaces.Binarization;
+import interfaces.SystemDetection;
+import systemdetection.FloodfillSystemDetection;
 import utils.ImageConverter;
 
 public class Start implements Runnable{
@@ -48,6 +51,7 @@ public class Start implements Runnable{
 	//Main Thread
 	public void run() {
 		
+		// BINARISATION
 		int window_size = 15;
 		double weight = -0.2;
 		
@@ -60,9 +64,15 @@ public class Start implements Runnable{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}		
+		}
+		
+		//SYSTEM DETECTION
+		int fill_depth = 3;
+		SystemDetection systemDetection = new FloodfillSystemDetection(fill_depth);
+		ArrayList<boolean[][]> systems = systemDetection.detectSystems(binaryImage);
 		
 	}
+	
 	
 }
 
