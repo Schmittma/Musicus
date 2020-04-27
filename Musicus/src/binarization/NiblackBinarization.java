@@ -43,14 +43,12 @@ public class NiblackBinarization implements Binarization {
 		for (int x = centerX - (w/2); x <= centerX + (w/2); x++) {
 			if( x < 0 || x >= pixels.length){
 				numOfPixels -= w; //One row less in the mean calculation
-				System.out.println("X out of bounds");
 				continue;
 			}
 				
 			for (int y = centerY - (w/2); y <= centerY + (w/2); y++) {
 				if(y < 0 || y >= pixels[x].length){
 					numOfPixels -= 1; //One pixel less in the mean calcualation
-					System.out.println("Y out of bounds");
 					continue;
 				}
 				

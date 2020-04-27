@@ -12,14 +12,11 @@ import interfaces.Binarization;
 import utils.ImageConverter;
 
 public class Start implements Runnable{
-
-	public static final boolean DEBUG = true;
-	public static final String DATAPATH = "C:\\Users\\Marius\\Musicus\\Musicus\\data\\";
-
 	
 	public static void main(String[] args) {
 		
-		File f1 = new File(DATAPATH + "OdeToJoy.png");
+		Globals.initFileSystem();
+		File f1 = new File(Globals.DATAPATH_BASE + "OdeToJoy.png");
 		
 		//Repeat this try/catch block for multiple images
 		try {
@@ -27,7 +24,7 @@ public class Start implements Runnable{
 			BufferedImage bi = ImageIO.read(f1);
 			Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
 			
-			if(DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File(DATAPATH + "OdeToJoy_Reconverted.png"));
+			if(Globals.DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File(Globals.DATAPATH_BASE + "OdeToJoy_Reconverted.png"));
 			
 			//Start the mainthread
 			Start instance = new Start(odeToJoy);
@@ -57,9 +54,9 @@ public class Start implements Runnable{
 		Binarization binarization = new NiblackBinarization(window_size, weight);
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
-		if(DEBUG) {
+		if(Globals.DEBUG) {
 			try {
-				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(DATAPATH + "OdeToJoy_Binarized.png"));
+				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(Globals.DATAPATH_BASE + Globals.BINARISATION_DATA + "OdeToJoy_Binarized.png"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
