@@ -68,9 +68,20 @@ public class Start implements Runnable{
 		
 		//SYSTEM DETECTION
 		int fill_depth = 3;
-		SystemDetection systemDetection = new FloodfillSystemDetection(fill_depth);
+		double hotizontal_threshold_percentage = 0.5;
+		SystemDetection systemDetection = new FloodfillSystemDetection(fill_depth, hotizontal_threshold_percentage);
 		ArrayList<boolean[][]> systems = systemDetection.detectSystems(binaryImage);
-		
+
+
+		if(Globals.DEBUG) {
+			for (int i = 0; i < systems.size(); i++) {
+				try {
+					ImageIO.write(ImageConverter.BinaryImageToBuffered(systems.get(i)), "png", new File(Globals.DATAPATH_BASE + Globals.SYSTEM_DETECTION_DATA + "system"+i+".png"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	

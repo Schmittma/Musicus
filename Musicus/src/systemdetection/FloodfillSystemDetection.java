@@ -7,10 +7,12 @@ import interfaces.SystemDetection;
 public class FloodfillSystemDetection implements SystemDetection{
 
 	private int fd;
+	private double htp; //Horizontal threshold percentage. -> The minimum width of a found object to be considered a system
 	
-	public FloodfillSystemDetection(int fd) {
+	public FloodfillSystemDetection(int fd, double horizontal_threshold_percentage) {
 		super();
 		this.fd = fd;
+		this.htp = horizontal_threshold_percentage;
 	}
 
 	@Override
@@ -39,7 +41,13 @@ public class FloodfillSystemDetection implements SystemDetection{
 					//We create a List of integer pairs (int array[2]) where index 1 is x and index 2 is y coordinate
 					ArrayList<int[]> entries = new ArrayList<>(); // Storage for all connected pairs
 					floodFill(x, y, map, entries);
-					systems.add(entriesToBitmap(entries));
+					boolean[][] bitmap = entriesToBitmap(entries);
+					
+					if(bitmap.length > (image.length * this.htp)) {
+						systems.add(bitmap);
+					}
+					
+					
 				}
 			}
 		}
@@ -62,17 +70,27 @@ public class FloodfillSystemDetection implements SystemDetection{
 			maxX = Math.max(entries.get(x)[indexX], maxX);
 			minX = Math.min(entries.get(x)[indexX], minX);
 			maxY = Math.max(entries.get(x)[indexY], maxY);
-			minY = Math.max(entries.get(x)[indexY], minY);
+			minY = Math.min(entries.get(x)[indexY], minY);
 		}
 		
-		return null;
+		int sizeX = maxX - minX + 1;
+		int sizeY = maxY - minY + 1;
+		
+		boolean[][] bitmap = new boolean[sizeX][sizeY];
+		
+		for(int[] entry : entries) {
+			int x = entry[indexX] - minX;
+			int y = entry[indexY] - minY;
+			bitmap[x][y] = true;
+		}
+		
+		return bitmap;
 	}
 
 	
 	//Searches for coordinates connected to this object
 	private void floodFill(int x, int y, boolean[][] map, ArrayList<int[]> entries) {
 		//Check bounds
-		System.out.println(entries.size());
 		if(x < 0 || y < 0 || x >= map.length || y >= map[x].length){
 			return;
 		}
