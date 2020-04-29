@@ -89,7 +89,7 @@ public class Start implements Runnable{
 		
 		
 		//STAFFLINE DETECTION
-		double staffline_threshold = 0.7;
+		double staffline_threshold = 0.5;
 		StafflineDetection stafflineDetection = new ProjectionStafflineDetection(staffline_threshold);
 		ArrayList<ArrayList<Staffline>> stafflinesOfSystems = new ArrayList<>();
 		
@@ -141,11 +141,21 @@ public class Start implements Runnable{
 		}
 		 
 		//STAFFLINE REMOVAL
+		ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
 		StafflineRemoval stafflineRemoval = new ClarkeStafflineRemoval();
 		for(int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
-			stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x));
+			systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
 		}
 		
+		if(Globals.DEBUG) {
+			for (int i = 0; i < systemsWithoutLines.size(); i++) {
+				try {
+					ImageIO.write(ImageConverter.BinaryImageToBuffered(systemsWithoutLines.get(i)), "png", new File(Globals.DATAPATH_BASE + Globals.STAFFLINE_REMOVAL_DATA + "system"+i+".png"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 	
 	
