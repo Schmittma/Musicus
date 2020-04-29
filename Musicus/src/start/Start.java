@@ -9,8 +9,11 @@ import javax.imageio.ImageIO;
 
 import binarization.NiblackBinarization;
 import general.Color;
+import general.Staffline;
 import interfaces.Binarization;
+import interfaces.StafflineDetection;
 import interfaces.SystemDetection;
+import stafflinedetection.ProjectionStafflineDetection;
 import systemdetection.FloodfillSystemDetection;
 import utils.ImageConverter;
 
@@ -72,7 +75,6 @@ public class Start implements Runnable{
 		SystemDetection systemDetection = new FloodfillSystemDetection(fill_depth, hotizontal_threshold_percentage);
 		ArrayList<boolean[][]> systems = systemDetection.detectSystems(binaryImage);
 
-
 		if(Globals.DEBUG) {
 			for (int i = 0; i < systems.size(); i++) {
 				try {
@@ -81,6 +83,15 @@ public class Start implements Runnable{
 					e.printStackTrace();
 				}
 			}
+		}
+		
+		//STAFFLINE DETECTION
+		double staffline_threshold = 0.7;
+		StafflineDetection stafflineDetection = new ProjectionStafflineDetection(staffline_threshold);
+		ArrayList<Staffline> stafflines;
+		
+		for(boolean[][] system : systems) {
+			stafflines = stafflineDetection.detectStafflines(system);
 		}
 	}
 	

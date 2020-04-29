@@ -2,7 +2,6 @@ package general;
 
 public class Staffline {
 
-	
 	//The Line is defined by a starting point and an endpoint.
 	//Both of these are located at the topmost pixel of the starting line (either at the end or at the start).
 	private Point startPoint;
@@ -11,8 +10,6 @@ public class Staffline {
 	//Together with the width, even  lines at an angle could be interpolated
 	private double width;
 
-	
-	
 	public Staffline(Point startPoint, Point endPoint, double width) {
 		super();
 		this.startPoint = startPoint;
