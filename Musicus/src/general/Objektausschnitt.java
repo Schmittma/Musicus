@@ -14,6 +14,9 @@ public class Objektausschnitt {
 	private int offsetYdown;
 	
 	
+	public Objektausschnitt() {
+		this.coordinates = new ArrayList<>();
+	}
 	
 	public ArrayList<Point> getCoordinates() {
 		return coordinates;
@@ -21,13 +24,30 @@ public class Objektausschnitt {
 	
 	public void addCoordinates(ArrayList<Point> coordinates) {
 		this.coordinates.addAll(coordinates);
+		updateBoundaries();
 	}
 	
 	public void addCoordinate(Point coordinate) {
 		this.coordinates.add(coordinate);
+		updateBoundaries();
 	}
 	
 	public void updateBoundaries() {
+		int tempLeft = coordinates.get(0).getX();
+		int tempRight = coordinates.get(0).getX();
+		int tempUp = coordinates.get(0).getY();
+		int tempDown = coordinates.get(0).getY();
+		
+		for(Point point : coordinates) {
+			tempLeft = Math.min(tempLeft, point.getX());
+			tempRight = Math.max(tempRight, point.getX());
+			tempUp = Math.min(tempUp, point.getY());
+			tempDown = Math.max(tempDown, point.getY());
+		}
+		offsetXleft = tempLeft;
+		offsetXright = tempRight;
+		offsetYup = tempUp;
+		offsetYdown = tempDown;
 		//TODO: determine the offsets from coordinates
 	}
 	

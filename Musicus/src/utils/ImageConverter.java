@@ -1,8 +1,11 @@
 package utils;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import general.Color;
+import general.Objektausschnitt;
+import general.Point;
 
 
 
@@ -60,5 +63,26 @@ public final class ImageConverter {
 		
 		return ret;
 		
+	}
+
+	public static BufferedImage objektausschnittToImage(Objektausschnitt objektausschnitt) {
+		int width = objektausschnitt.getOffsetXright() - objektausschnitt.getOffsetXleft() + 1;
+		int height = objektausschnitt.getOffsetYdown() - objektausschnitt.getOffsetYup() + 1;
+		
+		BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+		
+		ArrayList<Point> points = objektausschnitt.getCoordinates();
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				ret.setRGB(i, j, 0xffffffff);
+			}
+		}
+		
+		for(Point point : points) {
+			ret.setRGB(point.getX() - objektausschnitt.getOffsetXleft(), point.getY() - objektausschnitt.getOffsetYup(), 0x00000000);
+		}
+		
+		
+		return ret;
 	}
 }

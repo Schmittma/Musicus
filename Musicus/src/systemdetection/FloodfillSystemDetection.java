@@ -21,14 +21,7 @@ public class FloodfillSystemDetection implements SystemDetection{
 		ArrayList<boolean[][]> systems = new ArrayList<>();
 		
 		//Copy the array
-		boolean[][] map = new boolean[image.length][image[0].length];
-		
-		//Fill the the array
-		for(int x = 0; x < image.length; x++){
-			for(int y = 0; y < image[x].length; y++){
-				map[x][y] = image[x][y];
-			}
-		}
+		boolean[][] map = image.clone();
 		
 		//False means either, that the pixel is white (And thus cannot be an object)
 		// or it means, that we allready visited it.
