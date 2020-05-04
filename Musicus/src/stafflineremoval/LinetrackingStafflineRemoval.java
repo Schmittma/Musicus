@@ -10,6 +10,24 @@ import utils.UtilMath;
 //This class implements the Linetracking Chord algorithm of "A Comparative Study of Staff Removal Algorithms" Page 3
 public class LinetrackingStafflineRemoval implements StafflineRemoval{
 
+	int minimumAngle;
+	double lengthMultiplier;
+	int resolution;
+	
+	
+	/**
+	 * 
+	 * @param minimumAngle The minimum angle for a chord to be considered a distinct peak 
+	 * @param lengthMultiplier this value is multiplied with the line width and determines the threshold for the chordlength
+	 * @param resolution this value determines the resolution of the angles at which the chords are calculated
+	 */
+	public LinetrackingStafflineRemoval(int minimumAngle, double lengthMultiplier, int resolution) {
+		super();
+		this.minimumAngle = minimumAngle;
+		this.lengthMultiplier = lengthMultiplier;
+		this.resolution = Math.min(resolution,90);
+	}
+
 	@Override
 	public boolean[][] removeStafflines(boolean[][] staffImage, ArrayList<Staffline> stafflines) {
 		
@@ -19,7 +37,7 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 		//For every Staffline
 		for(Staffline line : stafflines) {
 			double gradient = (double)(line.getEndPoint().getY() - line.getStartPoint().getY()) / (double)(line.getEndPoint().getX() - line.getStartPoint().getX());
-			int angle = (int)Math.tan(gradient);
+			int angle = (int)Math.atan(gradient);
 
 			int y = line.getStartPoint().getY();
 			int w = (int) (line.getWidth() - 1);
@@ -28,40 +46,53 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 			//Over the whole line length
 			for(int x = line.getStartPoint().getX(); x <= line.getEndPoint().getX(); x++) {
 				
-				int[] lengths = new int[180]; //track the lengths of the chords
+				if(x == 53 && y == 42) {
+					System.out.println();
+				}
 				
-				for(int theta = angle; theta < angle+180; theta++) {
+				boolean remove = true;
+				for(int theta = angle-90; theta <= angle+90; theta+=resolution) {
 					
-					int length = chordlength(x, (int) ((y+0.5+w)/2),staffImage, theta);
-					lengths[theta-angle] = length;
+					int length = chordlength(x, (int) (y + 0.5 + w/2),staffImage, theta);
 					
-					if(theta > 30 && theta < 150 && length > 1.75 * line.getWidth() * Math.abs(Math.sin(theta))) {
-						
-						
-						System.out.println(theta + " " + 1.75 * line.getWidth() * Math.abs(Math.sin(theta)) + " " + length);
-						for (int i = y; i <= y+w; i++) {
-							copy[x][i] = false;
-						}
+					if(Math.abs(theta) > minimumAngle && length > lengthMultiplier * line.getWidth()) {
+						remove = false;
 						break;
+					}
+				}
+				
+				if(remove) {
+					for (int i = y; i <= y+w; i++) {
+						copy[x][i] = false;
 					}
 				}
 				
 				y = (int) (line.getStartPoint().getY() + x*gradient);
 			}
+
 		}
 		return copy;
 	}
 		
 	public int chordlength(int x, int y, boolean[][] image, int angle) {
-		double gradient = Math.atan(angle);
+		
+		double rad = angle * Math.PI/180;
+		
+		double gradHyp = Math.tan(rad);
+		double gradX = Math.cos(rad) * gradHyp;
+		double gradY = Math.sin(rad) * gradHyp;
+		double max = Math.max(Math.abs(gradX), Math.abs(gradY));
+		
+		//Normalize to 0-1
+		gradX /= max;
+		gradY /= max;
 		
 		int countPos = 0;
-		
 		while(true) {
-			int nextX = (int) ((y+(countPos+1)*gradient)+0.5);
-			int nextY = x+(countPos+1);
+			int nextX = (int) ((x+(countPos+1)*gradX)+0.5);
+			int nextY = (int) ((y+(countPos+1)*gradY)+0.5);
 			
-			if(nextX >= image.length || nextY < 0 || nextY >= image[nextX].length || image[nextX][nextY] == false) {
+			if(nextX < 0 || nextX >= image.length || nextY < 0 || nextY >= image[nextX].length || image[nextX][nextY] == false) {
 				break;
 			}
 
@@ -71,10 +102,10 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 		int countNeg = 0;
 		while(true) {
 			//Check bounds
-			int nextX = (int) ((y-(countNeg+1)*gradient)+0.5);
-			int nextY = x-(countNeg+1);
+			int nextX = (int) ((x-(countNeg+1)*gradX)+0.5);
+			int nextY = (int) ((y-(countNeg+1)*gradY)+0.5);
 			
-			if(nextX < 0 || nextY < 0 || nextY >= image[nextX].length || image[nextX][nextY] == false) {
+			if(nextX < 0 || nextX >= image.length || nextY < 0 || nextY >= image[nextX].length || image[nextX][nextY] == false) {
 				break;
 			}
 			countNeg++;

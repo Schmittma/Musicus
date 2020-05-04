@@ -19,6 +19,7 @@ import interfaces.SystemDetection;
 import objectdetection.FloodfillObjectdetection;
 import stafflinedetection.ProjectionStafflineDetection;
 import stafflineremoval.ClarkeStafflineRemoval;
+import stafflineremoval.LinetrackingStafflineRemoval;
 import systemdetection.FloodfillSystemDetection;
 import utils.ImageConverter;
 
@@ -67,6 +68,10 @@ public class Start implements Runnable{
 		double systemdetection_threshold = 0.5;
 		
 		double stafflinedetection_threshold = 0.5;
+		
+		double stafflineremoval_lengthMul = 2.5; //1.75
+		int stafflineremoval_resolution = 5; //3
+		int stafflineremoval_minimumAngle = 30; //30
 		
 		int objectfinder_fill_depth = 4;
 		
@@ -151,7 +156,7 @@ public class Start implements Runnable{
 		//STAFFLINE REMOVAL
 		ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
 		
-		StafflineRemoval stafflineRemoval = new ClarkeStafflineRemoval();
+		StafflineRemoval stafflineRemoval = new LinetrackingStafflineRemoval(stafflineremoval_minimumAngle, stafflineremoval_lengthMul, stafflineremoval_resolution);
 		for(int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
 			systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
 		}
