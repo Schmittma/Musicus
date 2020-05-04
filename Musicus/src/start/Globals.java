@@ -6,7 +6,7 @@ public class Globals {
 	
 	public static final boolean DEBUG = true;
 	//PATH TO DATA FOLDER ON FILE SYSTEM
-	public static final String DATAPATH_BASE = "C:\\Users\\Marius\\Musicus\\Musicus\\data\\";
+	public static final String RESOURCES_PATH = "C:\\Users\\Marius\\Musicus\\Musicus\\resources\\";
 	
 	public static final String BINARISATION_DATA = "binarisierung\\";
 	public static final String SYSTEM_DETECTION_DATA = "system_detection\\";
@@ -25,9 +25,9 @@ public class Globals {
 			OBJECT_DETECTION_DATA
 	};
 
-	public static void initFileSystem() {
+	public static void initFileSystem(String base) {
 		for(String path : REFRESH_LIST) {
-			File f = new File(DATAPATH_BASE + path);
+			File f = new File(base + path);
 			if(f.exists()) {
 				purgeDirectory(f);
 			}

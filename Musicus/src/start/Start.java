@@ -27,8 +27,14 @@ public class Start implements Runnable{
 	
 	public static void main(String[] args) {
 		
-		Globals.initFileSystem();
-		File f1 = new File(Globals.DATAPATH_BASE + "OdeToJoy.png");
+		if(args.length < 1) {
+			System.out.println("Bitte als erstes argument den Pfad zu einem Ordner angeben, in welchem die Daten gespeichert werden können");
+			return;
+		}
+		String datapath_base = args[0];
+		
+		Globals.initFileSystem(datapath_base);
+		File f1 = new File(Globals.RESOURCES_PATH + "OdeToJoy.png");
 		
 		//Repeat this try/catch block for multiple images
 		try {
@@ -36,10 +42,10 @@ public class Start implements Runnable{
 			BufferedImage bi = ImageIO.read(f1);
 			Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
 			
-			if(Globals.DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File(Globals.DATAPATH_BASE + "OdeToJoy_Reconverted.png"));
+			if(Globals.DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File(datapath_base + "OdeToJoy_Reconverted.png"));
 			
 			//Start the mainthread
-			Start instance = new Start(odeToJoy);
+			Start instance = new Start(odeToJoy, datapath_base);
 			Thread mainThread = new Thread(instance);
 			mainThread.start();
 		}catch(IOException e){
@@ -52,9 +58,11 @@ public class Start implements Runnable{
 //---------- Static end, Class start ----------------	
 	
 	private Color[][] inputImage;
+	private String datapath;
 			
-	public Start(Color[][] inputImage) {
+	public Start(Color[][] inputImage, String datapath) {
 		this.inputImage = inputImage;
+		this.datapath = datapath;
 	}
 	
 	//Main Thread
@@ -81,7 +89,7 @@ public class Start implements Runnable{
 		
 		if(Globals.DEBUG) {
 			try {
-				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(Globals.DATAPATH_BASE + Globals.BINARISATION_DATA + "OdeToJoy_Binarized.png"));
+				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(datapath + Globals.BINARISATION_DATA + "OdeToJoy_Binarized.png"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -94,7 +102,7 @@ public class Start implements Runnable{
 		if(Globals.DEBUG) {
 			for (int i = 0; i < systems.size(); i++) {
 				try {
-					ImageIO.write(ImageConverter.BinaryImageToBuffered(systems.get(i)), "png", new File(Globals.DATAPATH_BASE + Globals.SYSTEM_DETECTION_DATA + "system"+i+".png"));
+					ImageIO.write(ImageConverter.BinaryImageToBuffered(systems.get(i)), "png", new File(datapath + Globals.SYSTEM_DETECTION_DATA + "system"+i+".png"));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -164,7 +172,7 @@ public class Start implements Runnable{
 		if(Globals.DEBUG) {
 			for (int i = 0; i < systemsWithoutLines.size(); i++) {
 				try {
-					ImageIO.write(ImageConverter.BinaryImageToBuffered(systemsWithoutLines.get(i)), "png", new File(Globals.DATAPATH_BASE + Globals.STAFFLINE_REMOVAL_DATA + "system"+i+".png"));
+					ImageIO.write(ImageConverter.BinaryImageToBuffered(systemsWithoutLines.get(i)), "png", new File(datapath + Globals.STAFFLINE_REMOVAL_DATA + "system"+i+".png"));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -186,11 +194,11 @@ public class Start implements Runnable{
 			for (int i = 0; i < objectsOfSystems.size(); i++) {
 				for(int j = 0; j < objectsOfSystems.get(i).size(); j++) {
 					try {
-						File f = new File(Globals.DATAPATH_BASE + Globals.OBJECT_DETECTION_DATA + "system"+i+"\\");
+						File f = new File(datapath + Globals.OBJECT_DETECTION_DATA + "system"+i+"\\");
 						if(!f.exists()) {
 							f.mkdir();
 						}
-						ImageIO.write(ImageConverter.objektausschnittToImage(objectsOfSystems.get(i).get(j)), "png", new File(Globals.DATAPATH_BASE + Globals.OBJECT_DETECTION_DATA + "system"+i+ "\\object"+j+".png"));
+						ImageIO.write(ImageConverter.objektausschnittToImage(objectsOfSystems.get(i).get(j)), "png", new File(datapath + Globals.OBJECT_DETECTION_DATA + "system"+i+ "\\object"+j+".png"));
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
