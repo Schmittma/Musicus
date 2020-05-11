@@ -1,6 +1,8 @@
 package utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Util {
 
@@ -33,5 +35,61 @@ public class Util {
 		
 		
 		return runlengths;
+	}
+	
+	public static int estimateStaffLineHeight(boolean[][] base) {
+		ArrayList<ArrayList<Integer>> runlengths = GetVerticalRunLengths(base);
+		HashMap<Integer, Integer> count = new HashMap<>();
+		//Stafflineheight -> Black runs -> Odd indicies
+		for(int x = 0; x < runlengths.size(); x++) {
+			for(int y = 1; y < runlengths.get(x).size();y+=2) {
+				if(count.containsKey(runlengths.get(x).get(y))) {
+					count.put(runlengths.get(x).get(y), count.get(runlengths.get(x).get(y))+1);
+				}
+				else {
+					count.put(runlengths.get(x).get(y), 1);
+				}
+			}
+		}
+		
+		int maxKey = 0;
+		int maxVal = 0;
+		
+		for(Map.Entry<Integer,Integer> entry : count.entrySet()) {
+			if(entry.getValue() > maxVal) {
+				maxKey = entry.getKey();
+				maxVal = entry.getValue();
+			}
+		}
+		
+		return maxKey;
+	}
+	
+	public static int estimateStaffSpaceHeight(boolean[][] base) {
+		ArrayList<ArrayList<Integer>> runlengths = GetVerticalRunLengths(base);
+		HashMap<Integer, Integer> count = new HashMap<>();
+		//Stafflineheight -> Black runs -> Odd indicies
+		for(int x = 0; x < runlengths.size(); x++) {
+			for(int y = 0; y < runlengths.get(x).size();y+=2) {
+				if(count.containsKey(runlengths.get(x).get(y))) {
+					count.put(runlengths.get(x).get(y), count.get(runlengths.get(x).get(y))+1);
+				}
+				else {
+					count.put(runlengths.get(x).get(y), 1);
+				}
+			}
+		}
+		
+		int maxKey = 0;
+		int maxVal = 0;
+		
+		for(Map.Entry<Integer,Integer> entry : count.entrySet()) {
+			if(entry.getValue() > maxVal) {
+				maxKey = entry.getKey();
+				maxVal = entry.getValue();
+			}
+		}
+		
+		return maxKey;
 	}
 }
