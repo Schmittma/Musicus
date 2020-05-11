@@ -27,9 +27,12 @@ public class Util {
 				}
 				else {
 					runlength.add(count);
+					System.out.print(count + " ");
 					count = 1;
 				}
 			}
+			System.out.println();
+			runlength.add(count);
 			runlengths.add(runlength);
 		}
 		
@@ -91,5 +94,23 @@ public class Util {
 		}
 		
 		return maxKey;
+	}
+	
+	/**
+	 * Copies n*m sized arrays
+	 * 
+	 * @param baseArray
+	 * @return
+	 */
+	public static boolean[][] copyArray(boolean[][] baseArray){
+		
+		boolean[][] newArray = new boolean[baseArray.length][baseArray[0].length];
+		for(int x = 0; x < baseArray.length; x++) {
+			for (int y = 0; y < baseArray[x].length; y++) {
+				newArray[x][y] = baseArray[x][y];
+			}
+		}
+		
+		return newArray;
 	}
 }

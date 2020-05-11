@@ -22,6 +22,7 @@ import stafflineremoval.ClarkeStafflineRemoval;
 import stafflineremoval.LinetrackingStafflineRemoval;
 import systemdetection.FloodfillSystemDetection;
 import utils.ImageConverter;
+import utils.Util;
 
 public class Start implements Runnable{
 	
@@ -99,6 +100,14 @@ public class Start implements Runnable{
 		SystemDetection systemDetection = new FloodfillSystemDetection(systemdetection_fill_depth, systemdetection_threshold);
 		ArrayList<boolean[][]> systems = systemDetection.detectSystems(binaryImage);
 
+		
+		if(Globals.DEBUG) {
+			try {
+				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(datapath + Globals.BINARISATION_DATA + "OdeToJoy_Binarized2.png"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		if(Globals.DEBUG) {
 			for (int i = 0; i < systems.size(); i++) {
 				try {
@@ -155,10 +164,10 @@ public class Start implements Runnable{
 		
 		avgLineWidth /= countLine;
 		avgWhitespace /= countWhite;
-			
+		
 		if(Globals.DEBUG) {
-			System.out.println("Average line width: " + avgLineWidth);
-			System.out.println("Average whitespace: " + avgWhitespace);
+			System.out.println("Average line width: " + avgLineWidth + " | Estimation: " + Util.estimateStaffLineHeight(binaryImage));
+			System.out.println("Average whitespace: " + avgWhitespace + " | Estimation: " + Util.estimateStaffSpaceHeight(binaryImage));
 		}
 		 
 		//STAFFLINE REMOVAL

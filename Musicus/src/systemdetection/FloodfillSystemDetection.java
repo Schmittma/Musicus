@@ -3,6 +3,7 @@ package systemdetection;
 import java.util.ArrayList;
 
 import interfaces.SystemDetection;
+import utils.Util;
 
 public class FloodfillSystemDetection implements SystemDetection{
 
@@ -21,7 +22,7 @@ public class FloodfillSystemDetection implements SystemDetection{
 		ArrayList<boolean[][]> systems = new ArrayList<>();
 		
 		//Copy the array
-		boolean[][] map = image.clone();
+		boolean[][] map = Util.copyArray(image);
 		
 		//False means either, that the pixel is white (And thus cannot be an object)
 		// or it means, that we allready visited it.

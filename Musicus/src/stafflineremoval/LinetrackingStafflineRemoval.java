@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 import general.Staffline;
 import interfaces.StafflineRemoval;
+import utils.Util;
 import utils.UtilMath;
 
 //This class implements the Linetracking Chord algorithm of "A Comparative Study of Staff Removal Algorithms" Page 3
@@ -31,7 +32,7 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 	@Override
 	public boolean[][] removeStafflines(boolean[][] staffImage, ArrayList<Staffline> stafflines) {
 		
-		boolean[][] copy = staffImage.clone();
+		boolean[][] copy = Util.copyArray(staffImage);
 		
 		
 		//For every Staffline

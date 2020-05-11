@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import general.Objektausschnitt;
 import general.Point;
 import interfaces.ObjectFinder;
+import utils.Util;
 
 public class FloodfillObjectdetection implements ObjectFinder{
 
@@ -21,7 +22,7 @@ public class FloodfillObjectdetection implements ObjectFinder{
 		ArrayList<Objektausschnitt> objects = new ArrayList<>();
 		
 		//Copy the array
-		boolean[][] map = image.clone();
+		boolean[][] map = Util.copyArray(image);
 		
 		//False means either, that the pixel is white (And thus cannot be an object)
 		// or it means, that we allready visited it.

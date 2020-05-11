@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import general.Staffline;
 import interfaces.StafflineRemoval;
+import utils.Util;
 
 public class ClarkeStafflineRemoval implements StafflineRemoval{
 
@@ -11,7 +12,7 @@ public class ClarkeStafflineRemoval implements StafflineRemoval{
 	public boolean[][] removeStafflines(boolean[][] staffImage, ArrayList<Staffline> stafflines) {
 		
 		//Copy staffline array
-		boolean[][] copy = staffImage.clone();
+		boolean[][] copy = Util.copyArray(staffImage);
 		
 		//For every Staffline
 		for(Staffline line : stafflines) {
