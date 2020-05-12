@@ -29,11 +29,15 @@ public class Start implements Runnable{
 	
 	public static void main(String[] args) {
 		
-		if(args.length < 2) {
-			System.out.println("Usage: java -Xss50m -jar Musicus.jar [data_path] [base_image]");
+		if(args.length < 2 || args.length > 3) {
+			System.out.println("Usage: java -Xss50m -jar Musicus.jar [data_path] [base_image] [opt: Number of max threads]");
 			System.out.println("Bitte als erstes Argument den Pfad zu einem Ordner angeben, in welchem die Daten gespeichert werden können");
 			System.out.println("Bitte als zweites Argument den Pfad zum Bild angeben");
+			System.out.println("Als drittes Argument kann optional die Anzahl der maximal zu verwendenden Kerne angegeben werden");
 			return;
+		}
+		if(args.length == 3) {
+			Globals.NUMBER_OF_CORES = Integer.parseInt(args[2]);
 		}
 		String datapath_base = args[0];
 		
@@ -118,7 +122,7 @@ public class Start implements Runnable{
 		
 		
 		//STAFFLINE DETECTION
-		StafflineDetection stafflineDetection = new StablepathStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace);
+		StafflineDetection stafflineDetection = new StablepathStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace, Globals.NUMBER_OF_CORES);
 		ArrayList<ArrayList<Staffline>> stafflinesOfSystems = new ArrayList<>();
 		
 		for(boolean[][] system : systems) {

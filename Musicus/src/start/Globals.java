@@ -14,6 +14,7 @@ public class Globals {
 	public static final String STAFFLINE_REMOVAL_DATA = "staffline_removal\\";
 	public static final String OBJECT_DETECTION_DATA = "object_detection\\";
 	
+	public static int NUMBER_OF_CORES = 1;
 	
 	//Add paths of folders here, that shall be deleted and newly created upon start of program.
 	// All contents of the folders in the list will be deleted.

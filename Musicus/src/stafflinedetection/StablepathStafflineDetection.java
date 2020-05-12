@@ -24,14 +24,16 @@ public class StablepathStafflineDetection implements StafflineDetection{
 
 	private int stafflineHeight;
 	private int staffspaceHeight;
+	private int maxThreads;
 
 	private volatile int runCounter;
 	
 	
-	public StablepathStafflineDetection(int stafflineHeight, int staffspaceHeight) {
+	public StablepathStafflineDetection(int stafflineHeight, int staffspaceHeight, int maxThreads) {
 		super();
 		this.stafflineHeight = stafflineHeight;
 		this.staffspaceHeight = staffspaceHeight;
+		this.maxThreads = maxThreads;
 	}
 	
 	private synchronized void changeCounter(int value) {
@@ -73,8 +75,7 @@ public class StablepathStafflineDetection implements StafflineDetection{
 		}
 		
 		System.out.println("Finished Graph");
-		
-		int threadPool = Runtime.getRuntime().availableProcessors() - 2;
+		int threadPool = maxThreads;
 		ShortestPathAlgorithm<Integer,DefaultWeightedEdge> shortestPathAlg = new FloydWarshallShortestPaths<>(graph);
 		
 		for(int y = 0; y < system[0].length; y++) {
