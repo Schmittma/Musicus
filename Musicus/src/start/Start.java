@@ -18,6 +18,7 @@ import interfaces.StafflineRemoval;
 import interfaces.SystemDetection;
 import objectdetection.FloodfillObjectdetection;
 import stafflinedetection.ProjectionStafflineDetection;
+import stafflinedetection.StablepathStafflineDetection;
 import stafflineremoval.ClarkeStafflineRemoval;
 import stafflineremoval.LinetrackingStafflineRemoval;
 import systemdetection.FloodfillSystemDetection;
@@ -28,14 +29,16 @@ public class Start implements Runnable{
 	
 	public static void main(String[] args) {
 		
-		if(args.length < 1) {
-			System.out.println("Bitte als erstes argument den Pfad zu einem Ordner angeben, in welchem die Daten gespeichert werden können");
+		if(args.length < 2) {
+			System.out.println("Usage: java -Xss50m -jar Musicus.jar [data_path] [base_image]");
+			System.out.println("Bitte als erstes Argument den Pfad zu einem Ordner angeben, in welchem die Daten gespeichert werden können");
+			System.out.println("Bitte als zweites Argument den Pfad zum Bild angeben");
 			return;
 		}
 		String datapath_base = args[0];
 		
 		Globals.initFileSystem(datapath_base);
-		File f1 = new File(Globals.RESOURCES_PATH + "OdeToJoy.png");
+		File f1 = new File(args[1]);
 		
 		//Repeat this try/catch block for multiple images
 		try {
@@ -95,19 +98,14 @@ public class Start implements Runnable{
 				e.printStackTrace();
 			}
 		}
+
+		int estimatedStafflineHeight = Util.estimateStaffLineHeight(binaryImage);
+		int estimatedWhiteSpace = Util.estimateStaffSpaceHeight(binaryImage);
 		
 		//SYSTEM DETECTION
 		SystemDetection systemDetection = new FloodfillSystemDetection(systemdetection_fill_depth, systemdetection_threshold);
 		ArrayList<boolean[][]> systems = systemDetection.detectSystems(binaryImage);
 
-		
-		if(Globals.DEBUG) {
-			try {
-				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(datapath + Globals.BINARISATION_DATA + "OdeToJoy_Binarized2.png"));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 		if(Globals.DEBUG) {
 			for (int i = 0; i < systems.size(); i++) {
 				try {
@@ -120,7 +118,7 @@ public class Start implements Runnable{
 		
 		
 		//STAFFLINE DETECTION
-		StafflineDetection stafflineDetection = new ProjectionStafflineDetection(stafflinedetection_threshold);
+		StafflineDetection stafflineDetection = new StablepathStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace);
 		ArrayList<ArrayList<Staffline>> stafflinesOfSystems = new ArrayList<>();
 		
 		for(boolean[][] system : systems) {
@@ -166,8 +164,8 @@ public class Start implements Runnable{
 		avgWhitespace /= countWhite;
 		
 		if(Globals.DEBUG) {
-			System.out.println("Average line width: " + avgLineWidth + " | Estimation: " + Util.estimateStaffLineHeight(binaryImage));
-			System.out.println("Average whitespace: " + avgWhitespace + " | Estimation: " + Util.estimateStaffSpaceHeight(binaryImage));
+			System.out.println("Average line width: " + avgLineWidth + " | Estimation: " + estimatedStafflineHeight);
+			System.out.println("Average whitespace: " + avgWhitespace + " | Estimation: " + estimatedWhiteSpace);
 		}
 		 
 		//STAFFLINE REMOVAL

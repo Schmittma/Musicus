@@ -27,11 +27,9 @@ public class Util {
 				}
 				else {
 					runlength.add(count);
-					System.out.print(count + " ");
 					count = 1;
 				}
 			}
-			System.out.println();
 			runlength.add(count);
 			runlengths.add(runlength);
 		}
