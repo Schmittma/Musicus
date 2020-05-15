@@ -1,5 +1,6 @@
 package stafflinedetection;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,18 +15,21 @@ import interfaces.StafflineDetection;
 import start.Globals;
 import utils.ImageConverter;
 import utils.Util;
+import utils.UtilMath;
 
 public class OrientationStafflineDetection implements StafflineDetection {
 
 	private int stafflineHeight;
 	private int whitespaceHeight;
+	private String debugPath;
 	
 	
 	
-	public OrientationStafflineDetection(int stafflineHeight, int whitespaceHeight) {
+	public OrientationStafflineDetection(int stafflineHeight, int whitespaceHeight, String debugPath) {
 		super();
 		this.stafflineHeight = stafflineHeight;
 		this.whitespaceHeight = whitespaceHeight;
+		this.debugPath = debugPath;
 	}
  
 
@@ -70,7 +74,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		}
 		
 		try {
-			ImageIO.write(ImageConverter.BinaryImageToBuffered(copy), "png", new File("C:\\Users\\Marius\\Desktop\\musicus_data\\" + Globals.STAFFLINE_DETECTION_DATA + "system.png"));
+			ImageIO.write(ImageConverter.BinaryImageToBuffered(copy), "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "system.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -163,15 +167,13 @@ public class OrientationStafflineDetection implements StafflineDetection {
 			//Calculate the average distance at this column
 			
 			double avg = 0;
-			if(orientationsAtThisColumn.size() < 3) {
+			if(orientationsAtThisColumn.size() < 2) {
 				stafflineOrientation.add(null);
 			}
 			else {
 				for(int i = 0; i < orientationsAtThisColumn.size(); i++) {
 					avg += orientationsAtThisColumn.get(i);
-					System.out.print(orientationsAtThisColumn.get(i) + " ");
 				}
-				System.out.println();
 				
 				avg /= orientationsAtThisColumn.size();
 				
@@ -180,20 +182,87 @@ public class OrientationStafflineDetection implements StafflineDetection {
 			}
 		}
 		
-		System.out.println(stafflineOrientation+"\n\n");
 		try {
-			Files.write(Paths.get("C:\\Users\\Marius\\Desktop\\musicus_data\\" + Globals.STAFFLINE_DETECTION_DATA + "stafflines.txt"), stafflineOrientation.toString().replace(", ", "\n").getBytes(), StandardOpenOption.CREATE);
+			Files.write(Paths.get(debugPath + Globals.STAFFLINE_DETECTION_DATA + "stafflines.txt"), stafflineOrientation.toString().replace(", ", "\n").getBytes(), StandardOpenOption.CREATE);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+
+		//If the first values are null, default them to zero and interpolate from there
+		if(stafflineOrientation.get(0) == null) {
+			stafflineOrientation.set(0, 0.0);
+		}
+		if(stafflineOrientation.get(stafflineOrientation.size()-1) == null) {
+			stafflineOrientation.set(stafflineOrientation.size()-1, 0.0);
+		}
+		
 		//Interpolate missing Stafflines
-		while(stafflineOrientation.contains(null)) {
-			
+		for(int x = 0; x < stafflineOrientation.size(); x++) {
+			if(stafflineOrientation.get(x) == null) {
+				//Search for the next non null value on the left and on the right
+				int xLeft;
+				for(xLeft = x-1; xLeft >= 0; xLeft--) {
+					if(stafflineOrientation.get(xLeft) != null) {
+						break;
+					}
+				}
+				
+				int xRight;
+				for(xRight = x+1; xRight < stafflineOrientation.size(); xRight++) {
+					if(stafflineOrientation.get(xRight) != null) {
+						break;
+					}
+				}
+				
+				//Found some points, interpolate from those
+				if(xLeft >= 0 && xRight < stafflineOrientation.size()) {
+					double mu = (double)(x-xLeft) / (double)(xRight-xLeft);
+					double interpolated = UtilMath.LinearInterpolate(stafflineOrientation.get(xLeft), stafflineOrientation.get(xRight), mu);
+					stafflineOrientation.set(x, interpolated);
+				}
+			}
+		}
+		
+		try {
+			Files.write(Paths.get(debugPath + Globals.STAFFLINE_DETECTION_DATA + "stafflines_Interpolated.txt"), stafflineOrientation.toString().replace(", ", "\n").getBytes(), StandardOpenOption.CREATE);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		
+		//Find the stafflines with the given orientation information (with the assumption, that the line will be uniformly thick (should not matter tho)).
+		
+		ArrayList<Integer> counter = new ArrayList<>();//count for every row, how much pixels match the staffline orientation line.
+
+		for(int row = 0; row < copy[0].length; row++) {
+			double y = 0;
+			int tempCounter = 0;
+			for(int x = 0; x < stafflineOrientation.size(); x++) {
+				for(int yWidth = 0; yWidth < stafflineHeight; yWidth++) {
+					if((int) (row + yWidth + Math.round(y)) >= 0 && (int) (row + yWidth + Math.round(y)) < copy[x].length && 
+							copy[x][(int) (row + yWidth + Math.round(y))]) {
+					tempCounter++;
+					}
+				}
+				
+
+				y += stafflineOrientation.get(x);
+			}
+			counter.add(tempCounter);
+		}
+
+
+		
+		BufferedImage im = ImageConverter.horizontalProjectionToImage(counter.stream().mapToInt(i->i).toArray(), stafflineHeight*stafflineOrientation.size());
+		
+		try {
+			ImageIO.write(im, "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "counter.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		return null;
 		

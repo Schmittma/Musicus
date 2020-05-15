@@ -17,9 +17,7 @@ import interfaces.StafflineDetection;
 import interfaces.StafflineRemoval;
 import interfaces.SystemDetection;
 import objectdetection.FloodfillObjectdetection;
-import stafflinedetection.ProjectionStafflineDetection;
-import stafflinedetection.StablepathStafflineDetection;
-import stafflineremoval.ClarkeStafflineRemoval;
+import stafflinedetection.OrientationStafflineDetection;
 import stafflineremoval.LinetrackingStafflineRemoval;
 import systemdetection.FloodfillSystemDetection;
 import utils.ImageConverter;
@@ -27,8 +25,11 @@ import utils.Util;
 
 public class Start implements Runnable{
 	
+	private static volatile int mainthread_counter;
+	
 	public static void main(String[] args) {
 		
+		//Get parameters from user
 		if(args.length < 2 || args.length > 3) {
 			System.out.println("Usage: java -Xss50m -jar Musicus.jar [data_path] [base_image] [opt: Number of max threads]");
 			System.out.println("Bitte als erstes Argument den Pfad zu einem Ordner angeben, in welchem die Daten gespeichert werden können");
@@ -39,27 +40,65 @@ public class Start implements Runnable{
 		if(args.length == 3) {
 			Globals.NUMBER_OF_CORES = Integer.parseInt(args[2]);
 		}
+		
 		String datapath_base = args[0];
-		
-		Globals.initFileSystem(datapath_base);
-		File f1 = new File(args[1]);
-		
-		//Repeat this try/catch block for multiple images
-		try {
-			//Read first image
-			BufferedImage bi = ImageIO.read(f1);
-			Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
-			
-			if(Globals.DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File(datapath_base + "OdeToJoy_Reconverted.png"));
-			
-			//Start the mainthread
-			Start instance = new Start(odeToJoy, datapath_base);
-			Thread mainThread = new Thread(instance);
-			mainThread.start();
-		}catch(IOException e){
-			e.printStackTrace();
-			System.out.println("File couldn't be read, skipping image");
+		File imageOrImagefolder = new File(args[1]);
+		int numberOfImages = 1;
+
+		//Figure out if the given parameter was a folder and if yes, get the number of images in that folder.
+		if(imageOrImagefolder.isDirectory()) {
+			numberOfImages = imageOrImagefolder.listFiles().length;
 		}
+		
+		//Clear the data directory
+		Globals.purgeDirectory(new File(datapath_base));
+
+		//Repeat this try/catch block for multiple images
+		for(int imageCounter = 0; imageCounter < numberOfImages; imageCounter++) {
+			String datapath_current_image = datapath_base + "score"+(imageCounter+1)+"\\";
+			File currentImage;
+			
+			if(imageOrImagefolder.isDirectory()) {
+				currentImage = imageOrImagefolder.listFiles()[imageCounter];
+			}
+			else {
+				currentImage = imageOrImagefolder;
+			}
+			
+			try {
+				//Create folder structure
+				Globals.mkdir(datapath_current_image);
+				Globals.initFileSystem(datapath_current_image);
+				
+				BufferedImage bi = ImageIO.read(currentImage);
+				Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
+				
+				if(Globals.DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File(datapath_current_image + "Image_reconverted.png"));
+				
+				//Start the mainthread if the number of running threads doesn't exceed the number of available cores
+				while(mainthread_counter >= Globals.NUMBER_OF_CORES) {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				mainthread_counter++;
+				Start instance = new Start(odeToJoy, datapath_current_image);
+				Thread mainThread = new Thread(instance);
+				mainThread.start();
+				
+				
+
+				
+			}catch(IOException e){
+				e.printStackTrace();
+				System.out.println("File couldn't be read, skipping image");
+			}
+		}
+		
 					
 	}
 
@@ -76,6 +115,7 @@ public class Start implements Runnable{
 	//Main Thread
 	public void run() {
 		
+		System.out.println("Main Thread started");
 		//Variables
 		int binarisation_window_size = 15;
 		double binarisation_weight = -0.2;
@@ -122,101 +162,105 @@ public class Start implements Runnable{
 		
 		
 		//STAFFLINE DETECTION
-		StafflineDetection stafflineDetection = new StablepathStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace, Globals.NUMBER_OF_CORES);
+		StafflineDetection stafflineDetection = new OrientationStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace, datapath);
 		ArrayList<ArrayList<Staffline>> stafflinesOfSystems = new ArrayList<>();
 		
-		for(boolean[][] system : systems) {
+		stafflinesOfSystems.add(stafflineDetection.detectStafflines(systems.get(0)));
+		/*
+		 * for(boolean[][] system : systems) {
 			stafflinesOfSystems.add(stafflineDetection.detectStafflines(system));
 		}
-		
-		
-		//Calculate Avg. Whitespace and Avg. Linethickness
-		//Assuming we only have 5 stafflines per staff
-		int numberOfStafflinesPerStaff = 5;
-		double avgWhitespace = 0;
-		double avgLineWidth = 0;
-		int countWhite = 0;
-		int countLine = 0;
+		*/
 
-		for (int i = 0; i < stafflinesOfSystems.size(); i++) {
-			Staffline previous = null;
-			Staffline current = null;
-			
-			for (int j = 0; j < stafflinesOfSystems.get(i).size(); j++) {
-				current = stafflinesOfSystems.get(i).get(j);
-				
-				if(j % numberOfStafflinesPerStaff == 0) {
-					previous = current;
-				}
-				else {
-					//Distance between current line topmost and previous line bottommost for start and endpoint.
-					double whitespaceStart = Math.abs((previous.getStartPoint().getY() + (previous.getWidth() - 1)) - current.getStartPoint().getY() - 1);
-					double whitespaceEnd = Math.abs((previous.getEndPoint().getY() + (previous.getWidth() - 1)) - current.getEndPoint().getY() - 1);
-					avgWhitespace +=  (whitespaceStart + whitespaceEnd) / 2;
-					
-					countWhite++;
-					previous = current;
-				}
-				
-				avgLineWidth += current.getWidth();
-				countLine++;
-				
-			}
-		}
 		
-		avgLineWidth /= countLine;
-		avgWhitespace /= countWhite;
-		
-		if(Globals.DEBUG) {
-			System.out.println("Average line width: " + avgLineWidth + " | Estimation: " + estimatedStafflineHeight);
-			System.out.println("Average whitespace: " + avgWhitespace + " | Estimation: " + estimatedWhiteSpace);
-		}
-		 
-		//STAFFLINE REMOVAL
-		ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
-		
-		StafflineRemoval stafflineRemoval = new LinetrackingStafflineRemoval(stafflineremoval_minimumAngle, stafflineremoval_lengthMul, stafflineremoval_resolution);
-		for(int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
-			systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
-		}
-		
-		if(Globals.DEBUG) {
-			for (int i = 0; i < systemsWithoutLines.size(); i++) {
-				try {
-					ImageIO.write(ImageConverter.BinaryImageToBuffered(systemsWithoutLines.get(i)), "png", new File(datapath + Globals.STAFFLINE_REMOVAL_DATA + "system"+i+".png"));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		//OBJECT DETECTION
-
-		ArrayList<ArrayList<Objektausschnitt>> objectsOfSystems = new ArrayList<>();
-		
-		ObjectFinder finder = new FloodfillObjectdetection(objectfinder_fill_depth);
-		
-		for(int i = 0; i < systemsWithoutLines.size(); i++) {
-			ArrayList<Objektausschnitt> objects = finder.findObjects(systemsWithoutLines.get(i));
-			objectsOfSystems.add(objects);
-		}
-		
-		if(Globals.DEBUG) {
-			for (int i = 0; i < objectsOfSystems.size(); i++) {
-				for(int j = 0; j < objectsOfSystems.get(i).size(); j++) {
-					try {
-						File f = new File(datapath + Globals.OBJECT_DETECTION_DATA + "system"+i+"\\");
-						if(!f.exists()) {
-							f.mkdir();
-						}
-						ImageIO.write(ImageConverter.objektausschnittToImage(objectsOfSystems.get(i).get(j)), "png", new File(datapath + Globals.OBJECT_DETECTION_DATA + "system"+i+ "\\object"+j+".png"));
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		
+//		//Calculate Avg. Whitespace and Avg. Linethickness
+//		//Assuming we only have 5 stafflines per staff
+//		int numberOfStafflinesPerStaff = 5;
+//		double avgWhitespace = 0;
+//		double avgLineWidth = 0;
+//		int countWhite = 0;
+//		int countLine = 0;
+//
+//		for (int i = 0; i < stafflinesOfSystems.size(); i++) {
+//			Staffline previous = null;
+//			Staffline current = null;
+//			
+//			for (int j = 0; j < stafflinesOfSystems.get(i).size(); j++) {
+//				current = stafflinesOfSystems.get(i).get(j);
+//				
+//				if(j % numberOfStafflinesPerStaff == 0) {
+//					previous = current;
+//				}
+//				else {
+//					//Distance between current line topmost and previous line bottommost for start and endpoint.
+//					double whitespaceStart = Math.abs((previous.getStartPoint().getY() + (previous.getWidth() - 1)) - current.getStartPoint().getY() - 1);
+//					double whitespaceEnd = Math.abs((previous.getEndPoint().getY() + (previous.getWidth() - 1)) - current.getEndPoint().getY() - 1);
+//					avgWhitespace +=  (whitespaceStart + whitespaceEnd) / 2;
+//					
+//					countWhite++;
+//					previous = current;
+//				}
+//				
+//				avgLineWidth += current.getWidth();
+//				countLine++;
+//				
+//			}
+//		}
+//		
+//		avgLineWidth /= countLine;
+//		avgWhitespace /= countWhite;
+//		
+//		if(Globals.DEBUG) {
+//			System.out.println("Average line width: " + avgLineWidth + " | Estimation: " + estimatedStafflineHeight);
+//			System.out.println("Average whitespace: " + avgWhitespace + " | Estimation: " + estimatedWhiteSpace);
+//		}
+//		 
+//		//STAFFLINE REMOVAL
+//		ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
+//		
+//		StafflineRemoval stafflineRemoval = new LinetrackingStafflineRemoval(stafflineremoval_minimumAngle, stafflineremoval_lengthMul, stafflineremoval_resolution);
+//		for(int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
+//			systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
+//		}
+//		
+//		if(Globals.DEBUG) {
+//			for (int i = 0; i < systemsWithoutLines.size(); i++) {
+//				try {
+//					ImageIO.write(ImageConverter.BinaryImageToBuffered(systemsWithoutLines.get(i)), "png", new File(datapath + Globals.STAFFLINE_REMOVAL_DATA + "system"+i+".png"));
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+//		
+//		//OBJECT DETECTION
+//
+//		ArrayList<ArrayList<Objektausschnitt>> objectsOfSystems = new ArrayList<>();
+//		
+//		ObjectFinder finder = new FloodfillObjectdetection(objectfinder_fill_depth);
+//		
+//		for(int i = 0; i < systemsWithoutLines.size(); i++) {
+//			ArrayList<Objektausschnitt> objects = finder.findObjects(systemsWithoutLines.get(i));
+//			objectsOfSystems.add(objects);
+//		}
+//		
+//		if(Globals.DEBUG) {
+//			for (int i = 0; i < objectsOfSystems.size(); i++) {
+//				for(int j = 0; j < objectsOfSystems.get(i).size(); j++) {
+//					try {
+//						File f = new File(datapath + Globals.OBJECT_DETECTION_DATA + "system"+i+"\\");
+//						if(!f.exists()) {
+//							f.mkdir();
+//						}
+//						ImageIO.write(ImageConverter.objektausschnittToImage(objectsOfSystems.get(i).get(j)), "png", new File(datapath + Globals.OBJECT_DETECTION_DATA + "system"+i+ "\\object"+j+".png"));
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		}
+		mainthread_counter--;
+		System.out.println("Main Thread finished");
 	}
 	
 	

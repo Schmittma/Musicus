@@ -85,4 +85,41 @@ public final class ImageConverter {
 		
 		return ret;
 	}
+	
+
+	public static BufferedImage horizontalProjectionToImage(int[] projection, int width){
+		BufferedImage image = new BufferedImage(width, projection.length, BufferedImage.TYPE_BYTE_BINARY);
+		
+		for (int y = 0; y < projection.length; y++) {
+			for(int x = 0; x < width; x++){
+				if(x < projection[y]){
+					image.setRGB(x, y, 0);
+				}
+				else{
+					image.setRGB(x,y, 0xFFFFFFFF);
+				}
+			}
+		}
+		
+		return image;
+	}
+	
+
+	public static BufferedImage verticalProjectionToPImage(int[] projection, int height){
+		BufferedImage image = new BufferedImage(projection.length, height, BufferedImage.TYPE_BYTE_BINARY);
+		
+		for (int x = 0; x < projection.length; x++) {
+			for(int y = 0; y < height; y++){
+				if(y >= height - projection[x]){
+					image.setRGB(x, y, 0);
+				}
+				else{
+					image.setRGB(x, y, 0xFFFFFFFF);
+				}
+				
+			}
+		}
+		
+		return image;
+	}
 }

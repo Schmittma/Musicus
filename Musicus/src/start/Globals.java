@@ -38,12 +38,22 @@ public class Globals {
 		}
 	}
 	
-	private static void purgeDirectory(File dir) {
+	public static void purgeDirectory(File dir) {
 	    for (File file: dir.listFiles()) {
 	        if (file.isDirectory())
 	            purgeDirectory(file);
 	        file.delete();
 	    }
+	}
+	
+	public static void mkdir(String path) {
+		File f = new File(path);
+		if(f.exists()) {
+			purgeDirectory(f);
+		}
+		if(!f.exists()) {
+			f.mkdir();
+		}
 	}
 
 }
