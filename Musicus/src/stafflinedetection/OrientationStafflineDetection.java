@@ -81,7 +81,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		
 		//We now have an image with much of the musical symbols removed
 		int kRange = 5;
-		int tNumSegment = 10;
+		int tNumSegment = 5; //Minimum number of staff segments to be considered a valid coloumn
 		ArrayList<Double> stafflineOrientation = new ArrayList<>(copy.length);
 		
 		for(int col = 0; col < copy.length-kRange; col++) {
@@ -148,7 +148,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 					
 					//Calculate the average distance at this Segment in this column
 					
-					if(connectedMiddle.size() >= 6) {
+					if(connectedMiddle.size() >= kRange+1) {
 						double orientation = 0;
 						for(int i = 1; i < connectedMiddle.size(); i++) {
 							orientation += (connectedMiddle.get(0) - connectedMiddle.get(i));
@@ -232,6 +232,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 			e.printStackTrace();
 		}
 		
+		plotStaffLineOrientation(stafflineOrientation, system.length, system[0].length);
 		
 		//Find the stafflines with the given orientation information (with the assumption, that the line will be uniformly thick (should not matter tho)).
 		
@@ -269,12 +270,27 @@ public class OrientationStafflineDetection implements StafflineDetection {
 	}
 
 
-	private int distance(boolean[][] copy, ArrayList<ArrayList<Integer>> runs, int col, int y, int kRange) {
+	private void plotStaffLineOrientation(ArrayList<Double> stafflineOrientation, int width, int height) {
+		
+		double y = 0;
+		BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_BINARY);
+		
+		for(int x = 0; x < stafflineOrientation.size(); x++) {
+			im.setRGB(x, height/2 +(int)(y), 0xFFFFFFFF);
+			y+=stafflineOrientation.get(x);
+			
+			if(stafflineOrientation.get(x) == 0) {
+				y = Math.round(y);
+			}
+		}
+		
+		try {
+			ImageIO.write(im, "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "staffline_image.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		
-		
-		
-		return 0;
 	}
 
 }

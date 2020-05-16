@@ -56,7 +56,8 @@ public class Start implements Runnable{
 		
 		//Clear the data directory
 		Globals.purgeDirectory(new File(datapath_base));
-
+		mainthread_counter = 0;
+		
 		//Repeat this try/catch block for multiple images
 		for(int imageCounter = 0; imageCounter < numberOfImages; imageCounter++) {
 			String datapath_current_image = datapath_base + "score"+(imageCounter+1)+"\\";
@@ -79,8 +80,6 @@ public class Start implements Runnable{
 				
 				BufferedImage bi = ImageIO.read(currentImage);
 				Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
-				
-				if(Globals.DEBUG) ImageIO.write(ImageConverter.ColorArrayToBuffered(odeToJoy), "png", new File(datapath_current_image + "Image_reconverted.png"));
 				
 				//Start the mainthread if the number of running threads doesn't exceed the number of available cores
 				while(mainthread_counter >= Globals.NUMBER_OF_CORES) {
