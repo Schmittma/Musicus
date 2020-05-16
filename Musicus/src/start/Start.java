@@ -3,10 +3,14 @@ package start;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import binarization.GTBinarization;
 import binarization.NiblackBinarization;
 import general.Color;
 import general.Objektausschnitt;
@@ -65,10 +69,13 @@ public class Start implements Runnable{
 				currentImage = imageOrImagefolder;
 			}
 			
+			//Create folder structure
+			Globals.mkdir(datapath_current_image);
+			Globals.initFileSystem(datapath_current_image);
+			
+			
 			try {
-				//Create folder structure
-				Globals.mkdir(datapath_current_image);
-				Globals.initFileSystem(datapath_current_image);
+				Files.copy(currentImage.toPath(), new File(datapath_current_image+"original_image.png").toPath(), StandardCopyOption.REPLACE_EXISTING);
 				
 				BufferedImage bi = ImageIO.read(currentImage);
 				Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
@@ -89,9 +96,6 @@ public class Start implements Runnable{
 				Start instance = new Start(odeToJoy, datapath_current_image);
 				Thread mainThread = new Thread(instance);
 				mainThread.start();
-				
-				
-
 				
 			}catch(IOException e){
 				e.printStackTrace();
@@ -119,6 +123,7 @@ public class Start implements Runnable{
 		//Variables
 		int binarisation_window_size = 15;
 		double binarisation_weight = -0.2;
+		int GT_Binarisation_threshold = 127;
 		
 		int systemdetection_fill_depth = 3;
 		double systemdetection_threshold = 0.5;
@@ -132,12 +137,12 @@ public class Start implements Runnable{
 		int objectfinder_fill_depth = 4;
 		
 		// BINARISATION
-		Binarization binarization = new NiblackBinarization(binarisation_window_size, binarisation_weight);
+		Binarization binarization = new GTBinarization(GT_Binarisation_threshold);
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
 		if(Globals.DEBUG) {
 			try {
-				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(datapath + Globals.BINARISATION_DATA + "OdeToJoy_Binarized.png"));
+				ImageIO.write(ImageConverter.BinaryImageToBuffered(binaryImage), "png", new File(datapath + Globals.BINARISATION_DATA + "score_binarized.png"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
