@@ -37,10 +37,16 @@ public class ProjectionStafflineDetection implements StafflineDetection{
 			if(horizontalProjection[i] >= system.length * threshold) {
 				//If this line is part of an existing staffline
 				if(i != 0 && (horizontalProjection[i-1] >= system.length * threshold)) {
+					for(int x = 0; x < system.length; x++) {
+						stafflines.get(count-1).addPoint(new Point(x,i));
+					}
 					stafflines.get(count-1).setWidth(stafflines.get(count-1).getWidth() + 1);
 				}
 				else {
-					stafflines.add(new Staffline(new Point(0,i),new Point(system.length-1, i), 1));
+					stafflines.set(count, new Staffline());
+					for(int x = 0; x < system.length; x++) {
+						stafflines.get(count).addPoint(new Point(x,i));
+					}
 					count++;
 				}
 			}
