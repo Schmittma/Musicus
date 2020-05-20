@@ -47,7 +47,7 @@ public final class ImageConverter {
 	}
 	
 	public static BufferedImage BinaryImageToBuffered(boolean[][] inputImage) {
-		BufferedImage ret = new BufferedImage(inputImage.length, inputImage[0].length, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage ret = new BufferedImage(inputImage.length, inputImage[0].length, BufferedImage.TYPE_3BYTE_BGR);
 		
 		for(int x = 0; x < inputImage.length; x++) {
 			for(int y = 0; y < inputImage[x].length; y++) {
