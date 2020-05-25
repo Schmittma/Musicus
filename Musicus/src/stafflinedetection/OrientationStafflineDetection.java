@@ -48,7 +48,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		
 		for(int x = 0; x < runs.size(); x++) {
 			for(int run = 1; run < runs.get(x).size(); run+=2) {
-				if(runs.get(x).get(run) >= Tlength) {
+				if(runs.get(x).get(run) > Tlength) {
 					int newRun = runs.get(x).get(run) + runs.get(x).get(run-1);
 					
 					if(run < runs.get(x).size()-1) {
@@ -338,7 +338,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 				//Find the next black pixel in a local window which fits certain criteria (Runlength size smaller than a certain threshold
 				for(int y2 = 0; y2 < whitespaceHeight; y2++) {
 					
-					if(corrY + y2 >= 0 && corrY + y2 < system[x].length && system[x][corrY+y2] && getRunlength(system, x, corrY+y2) < Tlength) {
+					if(corrY + y2 >= 0 && corrY + y2 < system[x].length && system[x][corrY+y2] && getRunlength(system, x, corrY+y2) <= Tlength) {
 						
 						pixels.add(new Point(x,corrY + y2));
 						found = true;
@@ -346,7 +346,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 						break;
 					}
 					
-					else if(corrY-y2 >= 0 && corrY-y2 < system[x].length &&system[x][corrY-y2] && getRunlength(system, x, corrY-y2) < Tlength) {
+					else if(corrY-y2 >= 0 && corrY-y2 < system[x].length &&system[x][corrY-y2] && getRunlength(system, x, corrY-y2) <= Tlength) {
 						
 						pixels.add(new Point(x,corrY-y2));
 						found = true;
