@@ -11,14 +11,20 @@ import interfaces.Binarization;
  */
 public class GTBinarization implements Binarization {
 
+	enum CompareMode {
+		SMALLER_EQ_FOREGROUND,
+		LARGER_EQ_FOREGROUND
+	}
 	private int threshold;
+	private CompareMode compareMode;
 	
 	/**
 	 * Constructs a new Global threshold binarization with a given global threshold
 	 * @param threshold the global threshold (0-255) to be used for differencing between foreground and background color
 	 */
-	public GTBinarization(int threshold) {
+	public GTBinarization(int threshold, CompareMode compareMode) {
 		this.threshold = Math.min(255, Math.max( 0,threshold));
+		this.compareMode = compareMode;
 	}
 	
 	
@@ -31,7 +37,7 @@ public class GTBinarization implements Binarization {
 		
 		for(int x = 0; x < imageRGB.length; x++) {
 			for (int y = 0; y < imageRGB[x].length; y++) {
-				if(imageRGB[x][y].getGrayscale(Grayscale.AVERAGE) > threshold) {
+				if(isForeground(imageRGB[x][y].getGrayscale(Grayscale.AVERAGE),threshold)) {
 					//foreground
 					binaryIm[x][y] = true;
 				}
@@ -44,6 +50,19 @@ public class GTBinarization implements Binarization {
 		
 		
 		return binaryIm;
+	}
+
+
+	private boolean isForeground(int grayscale, int threshold) {
+		if(this.compareMode == CompareMode.SMALLER_EQ_FOREGROUND) {
+			return grayscale < threshold;
+		}
+		if(this.compareMode == CompareMode.LARGER_EQ_FOREGROUND) {
+			return grayscale > threshold;
+		}
+		
+		//default
+		return false;
 	}
 
 }

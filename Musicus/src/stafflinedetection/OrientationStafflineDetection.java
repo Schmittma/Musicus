@@ -323,7 +323,6 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		
 
 		counter.sort(Comparator.comparing(Point::getX));
-		System.out.println(counter);
 		
 		ArrayList<ArrayList<Point>> stafflinePixels = new ArrayList<>();
 		for(Point entry : counter) {

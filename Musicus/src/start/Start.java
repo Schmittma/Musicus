@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import binarization.GTBinarization;
+import binarization.NiblackBinarization;
+import binarization.SauvoldaBinarization;
 import general.Color;
 import general.Objektausschnitt;
 import general.Point;
@@ -79,7 +81,7 @@ public class Start implements Runnable{
 				Files.copy(currentImage.toPath(), new File(datapath_current_image+"original_image.png").toPath(), StandardCopyOption.REPLACE_EXISTING);
 				
 				BufferedImage bi = ImageIO.read(currentImage);
-				Color[][] odeToJoy = ImageConverter.bufferedImageToColorArray(bi);
+				Color[][] image = ImageConverter.bufferedImageToColorArray(bi);
 				
 				//Start the mainthread if the number of running threads doesn't exceed the number of available cores
 				while(mainthread_counter >= Globals.NUMBER_OF_CORES) {
@@ -92,7 +94,7 @@ public class Start implements Runnable{
 				}
 				
 				mainthread_counter++;
-				Start instance = new Start(odeToJoy, datapath_current_image);
+				Start instance = new Start(image, datapath_current_image);
 				Thread mainThread = new Thread(instance);
 				mainThread.start();
 				
@@ -136,7 +138,7 @@ public class Start implements Runnable{
 		int objectfinder_fill_depth = 4;
 		
 		// BINARISATION
-		Binarization binarization = new GTBinarization(GT_Binarisation_threshold);
+		Binarization binarization = new NiblackBinarization(binarisation_window_size, binarisation_weight);
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
 		if(Globals.DEBUG) {
@@ -169,12 +171,10 @@ public class Start implements Runnable{
 		StafflineDetection stafflineDetection = new OrientationStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace, datapath);
 		ArrayList<ArrayList<Staffline>> stafflinesOfSystems = new ArrayList<>();
 		
-		stafflinesOfSystems.add(stafflineDetection.detectStafflines(systems.get(0)));
-		/*
-		 * for(boolean[][] system : systems) {
+		for(boolean[][] system : systems) {
 			stafflinesOfSystems.add(stafflineDetection.detectStafflines(system));
 		}
-		*/
+		
 
 		
 		//Calculate Avg. Whitespace and Avg. Linethickness
