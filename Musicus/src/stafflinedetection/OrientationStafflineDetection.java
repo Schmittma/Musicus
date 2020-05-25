@@ -254,18 +254,20 @@ public class OrientationStafflineDetection implements StafflineDetection {
 			int tempCounter = 0;
 			for(int x = 0; x < stafflineOrientation.size(); x++) {
 				
+				/*
 				for(int yWidth = 0; yWidth < stafflineHeight; yWidth++) {
 					if((int) (row + yWidth + Math.round(y)) >= 0 && (int) (row + yWidth + Math.round(y)) < copy[x].length && 
 							copy[x][(int) (row + yWidth + Math.round(y))]) {
 						tempCounter++;
 					}
 				}
-				/*
+				*/
+				
 				if((int) (row + Math.round(y)) >= 0 && (int) (row + Math.round(y)) < copy[x].length &&
 						copy[x][(int)(row+Math.round(y))]) {
 					tempCounter++;
 				}
-				*/
+				
 
 				y += stafflineOrientation.get(x);
 			}
@@ -283,16 +285,18 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		}
 		
 		
-		//Remove all entries adjacent to peaks
+		//Remove all entries adjacent to peaks, except they are directly connected to the peak and above a certain threshold
 		
 		counter.sort(Collections.reverseOrder(Comparator.comparing(Point::getY)));	
-		double threshold = 0.5;
+		double threshold = 0.3; //Threshold for accepting a peak as a peak
+		double threshold2 = 0.7; //Threshold for accepting adjacent peaks 
 
 		for(int x1 = 0; x1 < counter.size(); x1++) {
 			//If the peak is smaller than a certain value
 			if(counter.get(x1).getY() < counter.get(0).getY()*threshold) {
 				break;
 			}
+			
 			
 			for(int x2 = 0; x2 < counter.size(); x2++) {
 				//Between the peak index and whitespaceheight on both sides
@@ -356,8 +360,8 @@ public class OrientationStafflineDetection implements StafflineDetection {
 				}
 				//Check around the found staffline (in both directions) to include pixels based on the staffline width, if they are foreground pixels and in the margin of stafflineheight (in both directions)
 				if(found) {
-					int numOfIncludedStafflines = stafflineHeight;
-					for(int y2 = 1; y2 < stafflineHeight; y2++) {
+					int numOfIncludedStafflines = stafflineHeight * 2;
+					for(int y2 = 1; y2 < stafflineHeight * 2; y2++) {
 						if(numOfIncludedStafflines > 0 && corrY+foundIndex+y2 >= 0 && corrY+foundIndex+y2 < system[x].length && system[x][corrY+foundIndex+y2]) {
 							pixels.add(new Point(x,corrY+foundIndex+y2));
 							numOfIncludedStafflines--;
@@ -384,6 +388,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		for(ArrayList<Point> pixels : stafflinePixels) {
 			stafflines.add(new Staffline(pixels,this.stafflineHeight));
 		}
+		
 		
 		
 		return stafflines;
