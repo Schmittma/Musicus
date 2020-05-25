@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import general.Color;
+import general.Color.Grayscale;
 import general.Objektausschnitt;
 import general.Point;
 
@@ -121,5 +122,17 @@ public final class ImageConverter {
 		}
 		
 		return image;
+	}
+	
+	public static int[][] calculateGrayscale(Color[][] imageRGB){
+		int[][] ret = new int[imageRGB.length][imageRGB[0].length];
+		
+		for (int x = 0; x < ret.length; x++) {
+			for (int y = 0; y < ret[x].length; y++) {
+				ret[x][y] = imageRGB[x][y].getGrayscale(Grayscale.AVERAGE);
+			}
+		}
+		
+		return ret;
 	}
 }

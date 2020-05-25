@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 
 import binarization.GTBinarization;
 import binarization.NiblackBinarization;
+import binarization.OtsuBinarization;
 import binarization.SauvoldaBinarization;
 import general.Color;
 import general.Objektausschnitt;
@@ -138,7 +139,7 @@ public class Start implements Runnable{
 		int objectfinder_fill_depth = 4;
 		
 		// BINARISATION
-		Binarization binarization = new NiblackBinarization(binarisation_window_size, binarisation_weight);
+		Binarization binarization = new OtsuBinarization();
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
 		if(Globals.DEBUG) {

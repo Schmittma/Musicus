@@ -10,7 +10,7 @@ public class UtilMath {
 	public static int max(int ... values) {
 	
 		int maxVal = values[0];
-		for(int x = 1; x < values.length - 1; x++) {
+		for(int x = 1; x < values.length; x++) {
 			maxVal = Math.max(maxVal, values[x]);
 		}
 		
@@ -25,11 +25,26 @@ public class UtilMath {
 	public static int min(int ... values) {
 		
 		int minVal = values[0];
-		for(int x = 1; x < values.length - 1; x++) {
+		for(int x = 1; x < values.length; x++) {
 			minVal = Math.min(minVal, values[x]);
 		}
 		
 		return minVal;
+	}
+	
+	/**
+	 * Takes any amount of integers and returns the average value
+	 * @param values
+	 * @return
+	 */
+	public static double average(int ... values) {
+		
+		int avg = 0;
+		for(int x = 0; x < values.length; x++) {
+			avg = values[x];
+		}
+		
+		return (double)avg / (double)values.length;
 	}
 	
 	/**
