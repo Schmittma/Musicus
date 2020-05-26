@@ -31,7 +31,7 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 
 	@Override
 	public boolean[][] removeStafflines(boolean[][] staffImage, ArrayList<Staffline> stafflines) {
-		
+		/*
 		boolean[][] copy = Util.copyArray(staffImage);
 		
 		
@@ -46,10 +46,6 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 			
 			//Over the whole line length
 			for(int x = line.getStartPoint().getX(); x <= line.getEndPoint().getX(); x++) {
-				
-				if(x == 53 && y == 42) {
-					System.out.println();
-				}
 				
 				boolean remove = true;
 				for(int theta = angle-90; theta <= angle+90; theta+=resolution) {
@@ -73,6 +69,9 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 
 		}
 		return copy;
+		*/
+		System.err.println("CURRENTLY NOT WORKING STAFFLINE REMOVAL ALGORITHM WAS USED");
+		return null;
 	}
 		
 	public int chordlength(int x, int y, boolean[][] image, int angle) {

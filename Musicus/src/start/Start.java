@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import binarization.GTBinarization;
-import binarization.NiblackBinarization;
 import binarization.OtsuBinarization;
-import binarization.SauvoldaBinarization;
 import general.Color;
 import general.Objektausschnitt;
 import general.Point;
@@ -24,8 +22,7 @@ import interfaces.StafflineRemoval;
 import interfaces.SystemDetection;
 import objectdetection.FloodfillObjectdetection;
 import stafflinedetection.OrientationStafflineDetection;
-import stafflineremoval.LinetrackingStafflineRemoval;
-import stafflineremoval.SimpleStafflineRemoval;
+import stafflineremoval.ClarkeStafflineRemoval;
 import systemdetection.FloodfillSystemDetection;
 import utils.ImageConverter;
 import utils.Util;
@@ -139,7 +136,7 @@ public class Start implements Runnable{
 		int objectfinder_fill_depth = 4;
 		
 		// BINARISATION
-		Binarization binarization = new OtsuBinarization();
+		Binarization binarization = new OtsuBinarization(GTBinarization.CompareMode.LARGER_EQ_FOREGROUND);
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
 		if(Globals.DEBUG) {
@@ -227,7 +224,7 @@ public class Start implements Runnable{
 		//STAFFLINE REMOVAL
 		ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
 		
-		StafflineRemoval stafflineRemoval = new SimpleStafflineRemoval();
+		StafflineRemoval stafflineRemoval = new ClarkeStafflineRemoval();
 		for(int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
 			systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
 		}

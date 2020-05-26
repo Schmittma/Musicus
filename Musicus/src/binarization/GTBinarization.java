@@ -11,10 +11,11 @@ import interfaces.Binarization;
  */
 public class GTBinarization implements Binarization {
 
-	enum CompareMode {
+	public enum CompareMode {
 		SMALLER_EQ_FOREGROUND,
 		LARGER_EQ_FOREGROUND
 	}
+	
 	private int threshold;
 	private CompareMode compareMode;
 	

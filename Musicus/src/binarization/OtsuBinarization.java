@@ -10,6 +10,13 @@ import utils.ImageConverter;
 import utils.UtilMath;
 
 public class OtsuBinarization implements Binarization{
+	
+	CompareMode compareMode;
+	
+	public OtsuBinarization(CompareMode compareMode) {
+		super();
+		this.compareMode = compareMode;
+	}
 
 	@Override
 	public boolean[][] binarize(Color[][] imageRGB) {
@@ -50,7 +57,7 @@ public class OtsuBinarization implements Binarization{
 			}
 		}
 		
-		GTBinarization gt = new GTBinarization(minIndex+1, CompareMode.SMALLER_EQ_FOREGROUND);
+		GTBinarization gt = new GTBinarization(minIndex+1, compareMode);
 		return gt.binarize(imageRGB);
 	}
 	

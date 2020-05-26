@@ -25,8 +25,10 @@ public class ClarkeStafflineRemoval implements StafflineRemoval{
 			//Over the whole line length
 			for(int x = 0; x < staffImage.length; x++) {
 				ArrayList<Point> points = line.getPointsOnXCoordinate(x);
+				if(points.size() <= 0) {
+					continue;
+				}
 				
-				//TODO: REPAIR CLARKE AND LINETRACKING
 				int yUp = points.get(0).getY();
 
 				int yDown = points.get(points.size()-1).getY();
