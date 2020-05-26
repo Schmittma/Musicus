@@ -12,8 +12,6 @@ import java.util.Comparator;
 
 import javax.imageio.ImageIO;
 
-import org.jgrapht.alg.drawing.model.Points;
-
 import general.Point;
 import general.Staffline;
 import interfaces.StafflineDetection;
