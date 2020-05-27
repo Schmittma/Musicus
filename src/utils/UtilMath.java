@@ -61,7 +61,7 @@ public class UtilMath {
 	    return(y1*(1-mu2)+y2*mu2);
 	} 
 	
-	double CubicInterpolate(double y0, double y1, double y2, double y3, double mu){
+	public static double CubicInterpolate(double y0, double y1, double y2, double y3, double mu){
 	   double a0,a1,a2,a3,mu2;
 
 	   mu2 = mu*mu;
@@ -72,4 +72,5 @@ public class UtilMath {
 
 	   return(a0*mu*mu2+a1*mu2+a2*mu+a3);
 	}
+	
 }

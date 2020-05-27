@@ -20,6 +20,8 @@ import interfaces.SystemDetection;
 import objectdetection.FloodfillObjectdetection;
 import stafflinedetection.OrientationStafflineDetection;
 import stafflineremoval.ClarkeStafflineRemoval;
+import stafflineremoval.LinetrackingStafflineRemoval;
+import stafflineremoval.SimpleStafflineRemoval;
 import systemdetection.FloodfillSystemDetection;
 import utils.ImageConverter;
 import utils.Util;
@@ -61,7 +63,7 @@ public class MainThread implements Runnable {
 		int objectfinder_fill_depth = 4;
 		
 		// BINARISATION
-		Binarization binarization = new OtsuBinarization(GTBinarization.CompareMode.SMALLER_EQ_FOREGROUND);
+		Binarization binarization = new OtsuBinarization(GTBinarization.CompareMode.LARGER_EQ_FOREGROUND);
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
 		if(Globals.DEBUG) {
@@ -91,11 +93,15 @@ public class MainThread implements Runnable {
 		
 		
 		//STAFFLINE DETECTION
-		StafflineDetection stafflineDetection = new OrientationStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace, datapath);
+		StafflineDetection stafflineDetection = new OrientationStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace, "");
 		ArrayList<ArrayList<Staffline>> stafflinesOfSystems = new ArrayList<>();
 		
+		int count = 0;
 		for(boolean[][] system : systems) {
+			new File(datapath + Globals.STAFFLINE_DETECTION_DATA + "system"+count+"\\").mkdir();
+			((OrientationStafflineDetection)(stafflineDetection)).setDebugPath(datapath + Globals.STAFFLINE_DETECTION_DATA + "system"+count+"\\");
 			stafflinesOfSystems.add(stafflineDetection.detectStafflines(system));
+			count++;
 		}
 		
 
@@ -149,7 +155,7 @@ public class MainThread implements Runnable {
 		//STAFFLINE REMOVAL
 		ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
 		
-		StafflineRemoval stafflineRemoval = new ClarkeStafflineRemoval();
+		StafflineRemoval stafflineRemoval = new SimpleStafflineRemoval();
 		for(int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
 			systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
 		}

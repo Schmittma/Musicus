@@ -15,7 +15,6 @@ import javax.imageio.ImageIO;
 import general.Point;
 import general.Staffline;
 import interfaces.StafflineDetection;
-import start.Globals;
 import utils.ImageConverter;
 import utils.Util;
 import utils.UtilMath;
@@ -32,6 +31,10 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		super();
 		this.stafflineHeight = stafflineHeight;
 		this.whitespaceHeight = whitespaceHeight;
+		this.debugPath = debugPath;
+	}
+	
+	public void setDebugPath(String debugPath) {
 		this.debugPath = debugPath;
 	}
  
@@ -77,7 +80,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		}
 		
 		try {
-			ImageIO.write(ImageConverter.BinaryImageToBuffered(copy), "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "system.png"));
+			ImageIO.write(ImageConverter.BinaryImageToBuffered(copy), "png", new File(debugPath + "system.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -192,7 +195,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		}
 		
 		try {
-			Files.write(Paths.get(debugPath + Globals.STAFFLINE_DETECTION_DATA + "stafflines.txt"), stafflineOrientation.toString().replace(", ", "\n").getBytes(), StandardOpenOption.CREATE);
+			Files.write(Paths.get(debugPath + "stafflines.txt"), stafflineOrientation.toString().replace(", ", "\n").getBytes(), StandardOpenOption.CREATE);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -235,7 +238,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		}
 		
 		try {
-			Files.write(Paths.get(debugPath + Globals.STAFFLINE_DETECTION_DATA + "stafflines_Interpolated.txt"), stafflineOrientation.toString().replace(", ", "\n").getBytes(), StandardOpenOption.CREATE);
+			Files.write(Paths.get(debugPath + "stafflines_Interpolated.txt"), stafflineOrientation.toString().replace(", ", "\n").getBytes(), StandardOpenOption.CREATE);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -277,7 +280,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		BufferedImage im = ImageConverter.horizontalProjectionToImage(listToIntArray(counter), stafflineOrientation.size());
 		
 		try {
-			ImageIO.write(im, "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "counter.png"));
+			ImageIO.write(im, "png", new File(debugPath + "counter.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -287,7 +290,6 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		
 		counter.sort(Collections.reverseOrder(Comparator.comparing(Point::getY)));	
 		double threshold = 0.3; //Threshold for accepting a peak as a peak
-		double threshold2 = 0.7; //Threshold for accepting adjacent peaks 
 
 		for(int x1 = 0; x1 < counter.size(); x1++) {
 			//If the peak is smaller than a certain value
@@ -314,7 +316,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		im = ImageConverter.horizontalProjectionToImage(listToIntArray(counterCleaned), stafflineOrientation.size());
 		
 		try {
-			ImageIO.write(im, "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "counter_cleaned.png"));
+			ImageIO.write(im, "png", new File(debugPath + "counter_cleaned.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -404,7 +406,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		}
 		
 		try {
-			ImageIO.write(im, "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "staffline_image.png"));
+			ImageIO.write(im, "png", new File(debugPath + "staffline_image.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -451,7 +453,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 		}
 		
 		try {
-			ImageIO.write(im, "png", new File(debugPath + Globals.STAFFLINE_DETECTION_DATA + "staffline_detected.png"));
+			ImageIO.write(im, "png", new File(debugPath + "staffline_detected.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

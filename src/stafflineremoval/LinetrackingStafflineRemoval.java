@@ -1,19 +1,18 @@
 package stafflineremoval;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
+import general.Point;
 import general.Staffline;
 import interfaces.StafflineRemoval;
 import utils.Util;
-import utils.UtilMath;
 
 //This class implements the Linetracking Chord algorithm of "A Comparative Study of Staff Removal Algorithms" Page 3
 public class LinetrackingStafflineRemoval implements StafflineRemoval{
 
-	int minimumAngle;
-	double lengthMultiplier;
-	int resolution;
+	private int minimumAngle;
+	private double lengthMultiplier;
+	private int resolution;
 	
 	
 	/**
@@ -31,26 +30,29 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 
 	@Override
 	public boolean[][] removeStafflines(boolean[][] staffImage, ArrayList<Staffline> stafflines) {
-		/*
+		
 		boolean[][] copy = Util.copyArray(staffImage);
 		
+		boolean[][] stafflineLookup = createStafflineLookupTable(stafflines, staffImage.length, staffImage[0].length);
 		
 		//For every Staffline
-		for(Staffline line : stafflines) {
-			double gradient = (double)(line.getEndPoint().getY() - line.getStartPoint().getY()) / (double)(line.getEndPoint().getX() - line.getStartPoint().getX());
-			int angle = (int)Math.atan(gradient);
-
-			int y = line.getStartPoint().getY();
-			int w = (int) (line.getWidth() - 1);
-			
-			
+		for(Staffline line : stafflines) {		
 			//Over the whole line length
-			for(int x = line.getStartPoint().getX(); x <= line.getEndPoint().getX(); x++) {
+			for(int x = 0; x <= staffImage.length; x++) {
 				
+				ArrayList<Point> points = line.getPointsOnXCoordinate(x);
+				if(points.size() <= 0) {
+					continue;
+				}
+				
+				int y = points.get((points.size()-1)/2).getY();
+				
+				double angle = 0; //TODO: Calculate angle of current line segment
 				boolean remove = true;
-				for(int theta = angle-90; theta <= angle+90; theta+=resolution) {
+
+				for(int theta = (int)(Math.round(angle)) - 90; theta <= angle+90; theta+=resolution) {
 					
-					int length = chordlength(x, (int) (y + 0.5 + w/2),staffImage, theta);
+					int length = chordlength(x, y, staffImage, theta, stafflineLookup);
 					
 					if(Math.abs(theta) > minimumAngle && length > lengthMultiplier * line.getWidth()) {
 						remove = false;
@@ -59,22 +61,18 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 				}
 				
 				if(remove) {
-					for (int i = y; i <= y+w; i++) {
-						copy[x][i] = false;
+					for (Point point : points) {
+						copy[point.getX()][point.getY()] = false;
 					}
 				}
-				
-				y = (int) (line.getStartPoint().getY() + x*gradient);
+			
 			}
 
 		}
 		return copy;
-		*/
-		System.err.println("CURRENTLY NOT WORKING STAFFLINE REMOVAL ALGORITHM WAS USED");
-		return null;
 	}
 		
-	public int chordlength(int x, int y, boolean[][] image, int angle) {
+	public int chordlength(int x, int y, boolean[][] image, int angle, boolean[][] stafflineLookup) {
 		
 		double rad = angle * Math.PI/180;
 		
@@ -88,30 +86,59 @@ public class LinetrackingStafflineRemoval implements StafflineRemoval{
 		gradY /= max;
 		
 		int countPos = 0;
+		int tempPosi = 0;
+		
 		while(true) {
-			int nextX = (int) ((x+(countPos+1)*gradX)+0.5);
-			int nextY = (int) ((y+(countPos+1)*gradY)+0.5);
+			int nextX = (int) ((x+(tempPosi+1)*gradX)+0.5);
+			int nextY = (int) ((y+(tempPosi+1)*gradY)+0.5);
 			
 			if(nextX < 0 || nextX >= image.length || nextY < 0 || nextY >= image[nextX].length || image[nextX][nextY] == false) {
 				break;
 			}
 
-			countPos++;
+			//Experimental: Only count those pixels, that are not on the detected staffline
+			if(!stafflineLookup[nextX][nextY]) {
+				countPos++;
+			}
+			
+			tempPosi++;
+			
 		}
 		
 		int countNeg = 0;
+		tempPosi = 0;
 		while(true) {
 			//Check bounds
-			int nextX = (int) ((x-(countNeg+1)*gradX)+0.5);
-			int nextY = (int) ((y-(countNeg+1)*gradY)+0.5);
+			int nextX = (int) ((x-(tempPosi+1)*gradX)+0.5);
+			int nextY = (int) ((y-(tempPosi+1)*gradY)+0.5);
 			
 			if(nextX < 0 || nextX >= image.length || nextY < 0 || nextY >= image[nextX].length || image[nextX][nextY] == false) {
 				break;
 			}
-			countNeg++;
+			
+			if(!stafflineLookup[nextX][nextY]) {
+				countNeg++;
+			}
+			
+			tempPosi++;
 		}
 		
 		return countPos+countNeg;
+	}
+
+	private boolean[][] createStafflineLookupTable(ArrayList<Staffline> lines, int width, int height) {
+		boolean[][] ret = new boolean[width][height];
+		
+		for(Staffline line : lines) {
+			ArrayList<Point> points = line.getPointsOnStaffline();
+
+			
+			for(Point p : points) {
+				ret[p.getX()][p.getY()] = true;
+			}
+
+		}
+		return ret;
 	}
 
 }
