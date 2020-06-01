@@ -1,7 +1,14 @@
 package systemdetection;
 
-import java.util.ArrayList;
+import java.util.AbstractMap.SimpleEntry;
 
+import org.apache.commons.math3.stat.descriptive.SynchronizedDescriptiveStatistics;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+
+import general.Point;
 import interfaces.SystemDetection;
 import utils.Util;
 
@@ -33,12 +40,15 @@ public class FloodfillSystemDetection implements SystemDetection{
 				if(map[x][y] == true){
 					//Found a new object, that has not yet been connected to anything
 					//We create a List of integer pairs (int array[2]) where index 1 is x and index 2 is y coordinate
-					ArrayList<int[]> entries = new ArrayList<>(); // Storage for all connected pairs
-					floodFill(x, y, map, entries);
-					boolean[][] bitmap = entriesToBitmap(entries);
+					ArrayList<Point> entries = new ArrayList<>(); // Storage for all connected pairs
+
+					floodFillIterative(x, y, map, entries);
 					
+					boolean[][] bitmap = entriesToBitmap(entries);
+
 					if(bitmap.length > (image.length * this.htp)) {
 						systems.add(bitmap);
+						
 					}
 					
 					
@@ -49,22 +59,21 @@ public class FloodfillSystemDetection implements SystemDetection{
 	}
 
 
-	private boolean[][] entriesToBitmap(ArrayList<int[]> entries) {
-		int indexX = 0;
-		int indexY = 1;
+	private boolean[][] entriesToBitmap(ArrayList<Point> entries) {
+		
 		
 		//Find the max and min X and Y values:
-		int maxX = entries.get(0)[indexX];
+		int maxX = entries.get(0).getX();
 		int minX = maxX;
 		
-		int minY = entries.get(0)[indexY];
+		int minY = entries.get(0).getY();
 		int maxY = minY;
 		
 		for(int x = 1; x < entries.size(); x++) {
-			maxX = Math.max(entries.get(x)[indexX], maxX);
-			minX = Math.min(entries.get(x)[indexX], minX);
-			maxY = Math.max(entries.get(x)[indexY], maxY);
-			minY = Math.min(entries.get(x)[indexY], minY);
+			maxX = Math.max(entries.get(x).getX(), maxX);
+			minX = Math.min(entries.get(x).getX(), minX);
+			maxY = Math.max(entries.get(x).getY(), maxY);
+			minY = Math.min(entries.get(x).getY(), minY);
 		}
 		
 		int sizeX = maxX - minX + 1;
@@ -72,9 +81,9 @@ public class FloodfillSystemDetection implements SystemDetection{
 		
 		boolean[][] bitmap = new boolean[sizeX][sizeY];
 		
-		for(int[] entry : entries) {
-			int x = entry[indexX] - minX;
-			int y = entry[indexY] - minY;
+		for(Point entry : entries) {
+			int x = entry.getX() - minX;
+			int y = entry.getY() - minY;
 			bitmap[x][y] = true;
 		}
 		
@@ -83,7 +92,7 @@ public class FloodfillSystemDetection implements SystemDetection{
 
 	
 	//Searches for coordinates connected to this object
-	private void floodFill(int x, int y, boolean[][] map, ArrayList<int[]> entries) {
+	private void floodFill(int x, int y, boolean[][] map, ArrayList<Point> entries) {
 		//Check bounds
 		if(x < 0 || y < 0 || x >= map.length || y >= map[x].length){
 			return;
@@ -93,8 +102,8 @@ public class FloodfillSystemDetection implements SystemDetection{
 		if(map[x][y] == false){
 			return;
 		}
-		int[] entry = {x, y};
-		entries.add(entry);
+
+		entries.add(new Point(x,y));
 		map[x][y] = false;
 		
 		for(int i = -1 * fd; i <= fd; i++){
@@ -107,5 +116,39 @@ public class FloodfillSystemDetection implements SystemDetection{
 	}
 	
 
+	private void floodFillIterative(int xStart, int yStart, boolean[][] map, ArrayList<Point> entries) {
+		
+		Queue<SimpleEntry<Integer,Integer>> queue = new LinkedList<>();
+		
+		queue.add(new SimpleEntry<Integer, Integer>(xStart,yStart) );
+		map[xStart][yStart] = false;
+		
+		while(!queue.isEmpty()) {
+			
+			SimpleEntry<Integer, Integer> coord = queue.remove();
+
+			int x = coord.getKey();
+			int y = coord.getValue();
+			
+			entries.add(new Point(x, y));
+			
+			for(int i = -1 * fd; i <= fd; i++){
+				for(int j = -1 * fd; j <= fd; j++){
+					if(!(i == 0 && j == 0) && isValid(x+i,y+j,map)){
+						queue.add(new SimpleEntry<Integer,Integer>(x+i,y+j));
+						map[x+i][y+j] = false;
+					}
+				}
+			}
+			
+		}
+	}
 	
+	private boolean isValid(int x, int y, boolean[][] map) {
+		if(x < 0 || y < 0 || x >= map.length || y >= map[x].length || map[x][y] == false){
+			return false;
+		}
+		
+		return true;
+	}
 }

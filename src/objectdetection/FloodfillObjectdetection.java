@@ -1,6 +1,9 @@
 package objectdetection;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import general.Objektausschnitt;
 import general.Point;
@@ -32,8 +35,7 @@ public class FloodfillObjectdetection implements ObjectFinder{
 			for (int y = 0; y < map[x].length; y++) {
 				if(map[x][y] == true){
 					Objektausschnitt ausschnitt = new Objektausschnitt();
-					
-					floodFill(x, y, map, ausschnitt);
+					floodFillIterative(x, y, map, ausschnitt);
 					
 					objects.add(ausschnitt);
 				}
@@ -64,5 +66,45 @@ public class FloodfillObjectdetection implements ObjectFinder{
 				}
 			}
 		}
+	}
+	
+	private void floodFillIterative(int xStart, int yStart, boolean[][] map, Objektausschnitt object) {
+		
+		Queue<SimpleEntry<Integer,Integer>> queue = new LinkedList<>();
+		
+		queue.add(new SimpleEntry<Integer, Integer>(xStart,yStart) );
+		map[xStart][yStart] = false;
+		
+		while(!queue.isEmpty()) {
+			SimpleEntry<Integer, Integer> coord = queue.remove();
+			
+			int x = coord.getKey();
+			int y = coord.getValue();
+
+			object.addCoordinate(new Point(x,y));
+			
+			for(int i = -1 * fd; i <= fd; i++){
+				for(int j = -1 * fd; j <= fd; j++){
+					if(!(i == 0 && j == 0) && isValid(x+i,y+j,map)){
+						queue.add(new SimpleEntry<Integer,Integer>(x+i,y+j));
+						map[x+i][y+j] = false;
+					}
+				}
+			}
+			
+		}
+	}
+
+	private boolean isValid(int x, int y, boolean[][] map) {
+		if(x < 0 || y < 0 || x >= map.length || y >= map[x].length){
+			return false;
+		}
+		
+		//Check if we allready visited or if the pixel is white
+		if(map[x][y] == false){
+			return false;
+		}
+		
+		return true;
 	}
 }
