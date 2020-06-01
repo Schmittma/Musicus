@@ -244,7 +244,7 @@ public class OrientationStafflineDetection implements StafflineDetection {
 			e.printStackTrace();
 		}
 		
-		//plotStaffLineOrientation(stafflineOrientation, system.length, system[0].length);
+		plotStaffLineOrientation(stafflineOrientation, system.length, system[0].length);
 		
 		//Find the stafflines with the given orientation information (with the assumption, that the line will be uniformly thick (should not matter tho)).
 		

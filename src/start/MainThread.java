@@ -63,7 +63,7 @@ public class MainThread implements Runnable {
 		int objectfinder_fill_depth = 4;
 		
 		// BINARISATION
-		Binarization binarization = new OtsuBinarization(GTBinarization.CompareMode.LARGER_EQ_FOREGROUND);
+		Binarization binarization = new GTBinarization(GT_Binarisation_threshold, GTBinarization.CompareMode.LARGER_EQ_FOREGROUND);
 		boolean[][] binaryImage = binarization.binarize(inputImage);
 		
 		if(Globals.DEBUG) {

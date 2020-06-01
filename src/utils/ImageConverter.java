@@ -53,10 +53,10 @@ public final class ImageConverter {
 		for(int x = 0; x < inputImage.length; x++) {
 			for(int y = 0; y < inputImage[x].length; y++) {
 				if(inputImage[x][y]) {
-					ret.setRGB(x, y, 0);
+					ret.setRGB(x, y, 0xffffffff);
 				}
 				else {
-					ret.setRGB(x, y, 0xffffffff);
+					ret.setRGB(x, y, 0x00000000);
 				}
 				
 			}
@@ -73,14 +73,9 @@ public final class ImageConverter {
 		BufferedImage ret = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
 		
 		ArrayList<Point> points = objektausschnitt.getCoordinates();
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				ret.setRGB(i, j, 0xffffffff);
-			}
-		}
 		
 		for(Point point : points) {
-			ret.setRGB(point.getX() - objektausschnitt.getOffsetXleft(), point.getY() - objektausschnitt.getOffsetYup(), 0x00000000);
+			ret.setRGB(point.getX() - objektausschnitt.getOffsetXleft(), point.getY() - objektausschnitt.getOffsetYup(), 0xFFFFFFFF);
 		}
 		
 		

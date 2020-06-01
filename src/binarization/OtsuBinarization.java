@@ -24,7 +24,7 @@ public class OtsuBinarization implements Binarization{
 		//Calculate Threshold
 		int[][] grayscale = ImageConverter.calculateGrayscale(imageRGB);
 		double[] histogram = calculateRelativeHistogram(grayscale);
-		int numOfEntries = grayscale.length * grayscale[0].length;
+		
 		
 		double w0 = histogram[0];
 		double w1 = 1 - w0;
@@ -33,15 +33,15 @@ public class OtsuBinarization implements Binarization{
 		ArrayList<Double> variances = new ArrayList<>();
 		//Class 0: from 0 -> t-1 | Class 1: from t -> L-1
 		for(int t = 1; t < histogram.length; t++) {	
-			
 			double mean0 = mean(histogram, w0, 0, t-1);
 			double mean1 = mean(histogram, w1, t, histogram.length-1);
 			
 			double v0 = variance(histogram, w0, mean0, 0, t-1);
 			double v1 = variance(histogram, w1, mean1, t, histogram.length-1);
-			
 			double vw = w0*v0 + w1*v1;
-			variances.add(vw);
+			if(!Double.isNaN(vw)) {
+				variances.add(vw);
+			}
 			
 			w0 += histogram[t];
 			w1 = 1 - w0;
@@ -57,6 +57,7 @@ public class OtsuBinarization implements Binarization{
 			}
 		}
 		
+		System.out.println(minIndex);
 		GTBinarization gt = new GTBinarization(minIndex+1, compareMode);
 		return gt.binarize(imageRGB);
 	}
