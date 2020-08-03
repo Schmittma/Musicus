@@ -12,7 +12,7 @@
       <entry name="!?*.clj" />
     </wildcardResourcePatterns>
     <bytecodeTargetLevel>
-      <module name="Musicus" target="1.5" />
+      <module name="Musicus" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>
