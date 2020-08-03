@@ -5,6 +5,10 @@ Dies ist der vollständige Source Code zur Studienarbeit Musicus.
 Das System kann mit einer eigenen main versehen werden, sollten bestimmmte Funktionalitäten nicht gewünscht oder fehlerhaft sein.
 Das Kernsystem (in *MainThread*) lässt sich theoretisch unabhängig verwenden.
 
+## Importieren
+
+Das System verwendet Maven als Abhängigkeitsmanager. Um die Importierung einfacher zu machen, wurden die IntelliJ und Eclipse metadaten (.settings, .idea, .classpath, etc.) mit in dieses Git-Repository hochgeladen.
+
 ## Ordnerstruktur *src*
 ```
 |--- start
