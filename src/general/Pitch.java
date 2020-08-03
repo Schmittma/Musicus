@@ -1,12 +1,22 @@
 package general;
 
 public enum Pitch {
-	C, Cis, Ces,
-	D, Des,
-	E, Eis,
-	F, Fis, Fes,
-	G, Gis, Ges,
-	A, Aes,
-	H, His,
-	PAUSE
+    C,
+    Cis,
+    Ces,
+    D,
+    Des,
+    E,
+    Eis,
+    F,
+    Fis,
+    Fes,
+    G,
+    Gis,
+    Ges,
+    A,
+    Aes,
+    H,
+    His,
+    PAUSE
 }

@@ -1,12 +1,12 @@
 package interfaces;
 
-import java.util.ArrayList;
-
 import general.MusicalObject;
 import general.Objektausschnitt;
 
+import java.util.ArrayList;
+
 public interface Classification {
 
-	//This method shall classify the objects in the list of objects and return them as Musicalobjects
-	public ArrayList<MusicalObject> classify(ArrayList<Objektausschnitt> objects, double averageWhitespace, double averageLineWidth);
+    //This method shall classify the objects in the list of objects and return them as Musicalobjects
+    public ArrayList<MusicalObject> classify(ArrayList<Objektausschnitt> objects, double averageWhitespace, double averageLineWidth);
 }
