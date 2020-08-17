@@ -1,14 +1,19 @@
 package start;
 
-import general.Color;
-import utils.ImageConverter;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import general.Color;
+import utils.ImageConverter;
+
 
 public class Start {
 
@@ -16,11 +21,56 @@ public class Start {
 
         //Get parameters from user
         if (args.length < 2 || args.length > 3) {
-            System.out.println("Usage: java -Xss50m -jar Musicus.jar [data_path] [base_image] [opt: Number of max threads]");
-            System.out.println("Bitte als erstes Argument den Pfad zu einem Ordner angeben, in welchem die Daten gespeichert werden kï¿½nnen");
+            System.out.println("Usage: java -jar Musicus.jar [data_path] [base_image] [opt: Number of max threads]");
+            System.out.println("Bitte als erstes Argument den Pfad zu einem Ordner angeben, in welchem die Daten gespeichert werden kï¿½nnen");   
             System.out.println("Bitte als zweites Argument den Pfad zum Bild angeben");
             System.out.println("Als drittes Argument kann optional die Anzahl der maximal zu verwendenden Kerne angegeben werden");
-            return;
+            
+            /* *
+             * Use this GUI only when really needed and make something that actually looks good.
+             * This is only intended for preview builds.
+             */
+            
+            JFileChooser jfc = new JFileChooser();
+            jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            int confirmed = JOptionPane.CANCEL_OPTION;
+            do {
+            	
+                int selected = jfc.showDialog(null, "Wähle das Ausgabeverzeichnis");
+                
+                if(selected == JFileChooser.APPROVE_OPTION)
+                {
+                	confirmed = JOptionPane.showConfirmDialog(null, "Alle Daten innerhalb des gewählten Ordners werden gelöscht\n Fortfahren?", "Hinweis!", JOptionPane.YES_NO_CANCEL_OPTION);
+                	if(confirmed == JOptionPane.CANCEL_OPTION) {
+                		return;
+                	}
+                }
+                else {
+                	return;
+                }
+                
+            }while(confirmed != JOptionPane.YES_OPTION);
+
+            args[0] = jfc.getSelectedFile().getAbsolutePath();
+            
+            jfc = new JFileChooser();
+            jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            jfc.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "jpeg", "png"));
+            int selected = jfc.showDialog(null, "Wähle das Eingabebild");
+           
+            if(selected == JFileChooser.APPROVE_OPTION) {
+            	args[1] = jfc.getSelectedFile().getAbsolutePath();
+            }
+            else {
+            	return;
+            }
+            
+            
+            /* *
+             * Ugly GUI end
+             */
+            
+            //return; //<- Comment out if Ugly gui is used
         }
         if (args.length == 3) {
             Globals.NUMBER_OF_CORES = Integer.parseInt(args[2]);
