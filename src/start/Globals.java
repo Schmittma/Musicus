@@ -34,7 +34,11 @@ public class Globals {
     }
 
     public static void purgeDirectory(File dir) {
-        for (File file : dir.listFiles()) {
+        File[] files = dir.listFiles();
+        if(files == null){
+            return;
+        }
+        for (File file : files) {
             if (file.isDirectory()) {
                 purgeDirectory(file);
             }

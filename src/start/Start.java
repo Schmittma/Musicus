@@ -19,6 +19,9 @@ public class Start {
 
     public static void main(String[] args) {
 
+
+        File imageOrImagefolder;
+        String datapath_base;
         //Get parameters from user
         if (args.length < 2 || args.length > 3) {
             System.out.println("Usage: java -jar Musicus.jar [data_path] [base_image] [opt: Number of max threads]");
@@ -36,11 +39,11 @@ public class Start {
             int confirmed = JOptionPane.CANCEL_OPTION;
             do {
             	
-                int selected = jfc.showDialog(null, "Wähle das Ausgabeverzeichnis");
+                int selected = jfc.showDialog(null, "Wï¿½hle das Ausgabeverzeichnis");
                 
                 if(selected == JFileChooser.APPROVE_OPTION)
                 {
-                	confirmed = JOptionPane.showConfirmDialog(null, "Alle Daten innerhalb des gewählten Ordners werden gelöscht\n Fortfahren?", "Hinweis!", JOptionPane.YES_NO_CANCEL_OPTION);
+                	confirmed = JOptionPane.showConfirmDialog(null, "Alle Daten innerhalb des gewï¿½hlten Ordners werden gelï¿½scht\n Fortfahren?", "Hinweis!", JOptionPane.YES_NO_CANCEL_OPTION);
                 	if(confirmed == JOptionPane.CANCEL_OPTION) {
                 		return;
                 	}
@@ -51,15 +54,16 @@ public class Start {
                 
             }while(confirmed != JOptionPane.YES_OPTION);
 
-            args[0] = jfc.getSelectedFile().getAbsolutePath();
-            
+            datapath_base = jfc.getSelectedFile().getAbsolutePath() + "/";
+            System.out.println(datapath_base);
+
             jfc = new JFileChooser();
             jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
             jfc.setFileFilter(new FileNameExtensionFilter("Image files", "jpg", "jpeg", "png"));
-            int selected = jfc.showDialog(null, "Wähle das Eingabebild");
+            int selected = jfc.showDialog(null, "Wï¿½hle das Eingabebild");
            
             if(selected == JFileChooser.APPROVE_OPTION) {
-            	args[1] = jfc.getSelectedFile().getAbsolutePath();
+                imageOrImagefolder = jfc.getSelectedFile();
             }
             else {
             	return;
@@ -72,12 +76,14 @@ public class Start {
             
             //return; //<- Comment out if Ugly gui is used
         }
+        else{
+            datapath_base = args[0];
+            imageOrImagefolder = new File(args[1]);
+        }
         if (args.length == 3) {
             Globals.NUMBER_OF_CORES = Integer.parseInt(args[2]);
         }
 
-        String datapath_base = args[0];
-        File imageOrImagefolder = new File(args[1]);
         int numberOfImages = 1;
 
         //Figure out if the given parameter was a folder and if yes, get the number of images in that folder.
