@@ -9,6 +9,10 @@ Das Kernsystem (in *MainThread*) lässt sich theoretisch unabhängig verwenden.
 
 Das System verwendet Maven als Abhängigkeitsmanager. Um die Importierung einfacher zu machen, wurden die IntelliJ und Eclipse metadaten (.settings, .idea, .classpath, etc.) mit in dieses Git-Repository hochgeladen.
 
+## Hinweis für die Nutzung mit Eclipse
+
+Sollte das Projekt auf Grund von Maven nicht korrekt laufen, ist es möglich, alle src Dateien in ein neues Projekt zu kopieren und ohne Maven dependencies zu arbeiten. Selbstverständlich ist es dann nicht möglich, Klassen aus diesen Maven dependencies zu verwenden
+
 ## Ordnerstruktur *src*
 ```
 |--- start
