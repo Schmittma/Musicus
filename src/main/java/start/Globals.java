@@ -13,13 +13,14 @@ public class Globals {
     public static final String STAFFLINE_DETECTION_DATA = "staffline_detection\\";
     public static final String STAFFLINE_REMOVAL_DATA = "staffline_removal\\";
     public static final String OBJECT_DETECTION_DATA = "object_detection\\";
+    public static final String OBJECT_BOUNDING_BOXES_DATA = OBJECT_DETECTION_DATA + "bounding_boxes\\";
 
     public static int NUMBER_OF_CORES = 1;
 
     //Add paths of folders here, that shall be deleted and newly created upon start of program.
     // All contents of the folders in the list will be deleted.
     private static final String[] REFRESH_LIST = { BINARISATION_DATA, SYSTEM_DETECTION_DATA, STAFFLINE_DETECTION_DATA, STAFFLINE_REMOVAL_DATA,
-                                                   OBJECT_DETECTION_DATA };
+                                                   OBJECT_DETECTION_DATA, OBJECT_BOUNDING_BOXES_DATA };
 
     public static void initFileSystem(String base) {
         for (String path : REFRESH_LIST) {

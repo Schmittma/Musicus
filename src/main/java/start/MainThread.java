@@ -1,12 +1,17 @@
 package main.java.start;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import it.unimi.dsi.fastutil.Arrays;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import main.java.binarization.GTBinarization;
 import main.java.binarization.OtsuBinarization;
 import main.java.general.Color;
@@ -44,7 +49,8 @@ public class MainThread implements Runnable {
     public void run() {
 
         System.out.println("Main Thread started");
-        //Variables
+        
+        /* ------ Variables ------ */
         int binarisation_window_size = 15;
         double binarisation_weight = -0.2;
         int GT_Binarisation_threshold = 127;
@@ -60,7 +66,7 @@ public class MainThread implements Runnable {
 
         int objectfinder_fill_depth = 4;
 
-        // BINARISATION
+        /* ------ BINARIZATION ------ */
         Binarization binarization = new OtsuBinarization(GTBinarization.CompareMode.SMALLER_EQ_FOREGROUND);
         boolean[][] binaryImage = binarization.binarize(inputImage);
 
@@ -75,7 +81,7 @@ public class MainThread implements Runnable {
         int estimatedStafflineHeight = Util.estimateStaffLineHeight(binaryImage);
         int estimatedWhiteSpace = Util.estimateStaffSpaceHeight(binaryImage);
 
-        //SYSTEM DETECTION
+        /* ------ SYSTEM DETECTION ------ */
         SystemDetection systemDetection = new FloodfillSystemDetection(systemdetection_fill_depth, systemdetection_threshold);
         ArrayList<boolean[][]> systems = systemDetection.detectSystems(binaryImage);
 
@@ -91,7 +97,7 @@ public class MainThread implements Runnable {
             }
         }
 
-        //STAFFLINE DETECTION
+        /* ------ STAFFLINE DETECTION ------ */
         StafflineDetection stafflineDetection = new OrientationStafflineDetection(estimatedStafflineHeight, estimatedWhiteSpace, "");
         ArrayList<ArrayList<Staffline>> stafflinesOfSystems = new ArrayList<>();
 
@@ -105,7 +111,7 @@ public class MainThread implements Runnable {
 
         //Calculate Avg. Whitespace and Avg. Linethickness
         //Assuming we only have 5 stafflines per staff
-        int numberOfStafflinesPerStaff = 5;
+        int numberOfStafflinesPerStaff = 5; 
         double avgWhitespace = 0;
         double avgLineWidth = 0;
         int countWhite = 0;
@@ -156,7 +162,7 @@ public class MainThread implements Runnable {
             System.out.println("Average whitespace: " + avgWhitespace + " | Estimation: " + estimatedWhiteSpace);
         }
 
-        //STAFFLINE REMOVAL
+        /* ------ STAFFLINE REMOVAL ------ */
         ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
 
         StafflineRemoval stafflineRemoval = new SimpleStafflineRemoval();
@@ -176,7 +182,7 @@ public class MainThread implements Runnable {
             }
         }
 
-        //OBJECT DETECTION
+        /* ------ OBJECT DETECTION ------ */
 
         ArrayList<ArrayList<Objektausschnitt>> objectsOfSystems = new ArrayList<>();
 
@@ -209,15 +215,64 @@ public class MainThread implements Runnable {
             }
         }
 
+        /* ------ OUTPUT BOUNDING BOXES ------ */
+        ArrayList<BufferedImage> systems_as_image = new ArrayList<>();
 
-        //Get the bounding boxes of each object 
-        ArrayList<Point[]> boundingBoxes = new ArrayList<Point[]>();
+        JSONObject json = new JSONObject();
+        JSONArray json_systems = new JSONArray();
 
-        for(ArrayList<Objektausschnitt> objectLists : objectsOfSystems){
+        for(int x = 0; x < systems.size(); x++){
+            ArrayList<Objektausschnitt> objectLists = objectsOfSystems.get(x);
+            BufferedImage curr_system = ImageConverter.BinaryImageToBuffered(systems.get(x));
+            Graphics2D curr_system_graphics = curr_system.createGraphics();
+
+            JSONArray json_objectsArray = new JSONArray();
+
             for(Objektausschnitt object : objectLists){
-                boundingBoxes.add(object.getBoundingBox());
-                System.out.println(packaging);
+                Point[] bounds = object.getBoundingBox();
+                
+                JSONObject top_left = new JSONObject();
+                JSONObject bottom_right = new JSONObject();
+                
+                top_left.put("x", bounds[0].getX());
+                top_left.put("y", 0);
+
+                bottom_right.put("x", bounds[3].getX());
+                bottom_right.put("y", systems.get(0)[0].length - 1);
+
+                JSONObject object_entry = new JSONObject();
+
+                object_entry.put("top_left", top_left);
+                object_entry.put("bottom_right", bottom_right);
+
+                json_objectsArray.add(object_entry);
+
+                curr_system_graphics.setColor(java.awt.Color.RED);
+                curr_system_graphics.drawRect(bounds[0].getX(), 0, bounds[3].getX() - bounds[0].getX(), systems.get(0)[0].length - 1);
             }
+
+            json_systems.add(json_objectsArray);
+            systems_as_image.add(curr_system);
+        }
+
+        json.put("systems", json_systems);
+
+
+        try{
+            new File(datapath + Globals.OBJECT_BOUNDING_BOXES_DATA).mkdir();
+            
+            //Write JSON
+            File json_file = new File(datapath + Globals.OBJECT_BOUNDING_BOXES_DATA + "bounding_boxes.json");
+            json_file.createNewFile();
+            FileWriter file_writer = new FileWriter(json_file);
+            file_writer.write(json.toJSONString());
+            file_writer.close();
+
+            for(int x = 0; x < systems_as_image.size(); x++) {
+                ImageIO.write(systems_as_image.get(x), "png", new File(datapath + Globals.OBJECT_BOUNDING_BOXES_DATA + "system" + x + ".png"));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         changeCounter(-1);
