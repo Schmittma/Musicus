@@ -94,4 +94,52 @@ public class Objektausschnitt {
         return corners;
     }
 
+    public int getWidth(){
+        return offsetXright - offsetXleft + 1; 
+    }
+
+    public int getHeight(){
+        return offsetYdown - offsetYup + 1; 
+    }
+
+    public int[] toHorizontalProjection(){
+        int[] projection = new int[this.getWidth()];
+
+        for(Point p : this.coordinates){
+            projection[p.getX() - this.getOffsetXleft()]++;
+        }
+
+        return projection;
+    }
+
+    // Splits this object at "split_x" and returns the resulting other 
+    // half of the Object as a new Objektausschnitt   
+    //"keep_left" determines, whether this object contains the left half of the split or the right one
+    // The points at x=split_x will allways be in the left half. 
+    public Objektausschnitt split_at_x_cooordinate(int split_x, boolean keep_left)
+    {
+        Objektausschnitt new_obj = new Objektausschnitt();
+        
+        for(int x = 0; x < coordinates.size(); x++){
+            if(keep_left)
+            {
+                if(coordinates.get(x).getX() > split_x){
+                    new_obj.addCoordinate(new Point(coordinates.get(x).getX(), coordinates.get(x).getY()));
+                    this.coordinates.remove(x);
+                    x--;
+                }
+            }
+            else{
+                if(coordinates.get(x).getX() <= split_x){
+                    new_obj.addCoordinate(new Point(coordinates.get(x).getX(), coordinates.get(x).getY()));
+                    this.coordinates.remove(x);
+                    x--;
+                }
+            }
+           
+        }
+
+        updateBoundaries();
+        return new_obj;
+    }
 }

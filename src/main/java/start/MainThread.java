@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 
 import javax.imageio.ImageIO;
 
@@ -29,6 +31,7 @@ import main.java.stafflineremoval.SimpleStafflineRemoval;
 import main.java.systemdetection.FloodfillSystemDetection;
 import main.java.utils.ImageConverter;
 import main.java.utils.Util;
+import main.java.utils.UtilMath;
 
 public class MainThread implements Runnable {
 
@@ -112,6 +115,7 @@ public class MainThread implements Runnable {
         //Calculate Avg. Whitespace and Avg. Linethickness
         //Assuming we only have 5 stafflines per staff
         int numberOfStafflinesPerStaff = 5; 
+        int numberOfSystemsInStaff = stafflinesOfSystems.get(0).size() / numberOfStafflinesPerStaff; //Zu deutsch, Anzahl von Akkoladen pro system
         double avgWhitespace = 0;
         double avgLineWidth = 0;
         int countWhite = 0;
@@ -161,6 +165,7 @@ public class MainThread implements Runnable {
             System.out.println("Average line width: " + avgLineWidth + " | Estimation: " + estimatedStafflineHeight);
             System.out.println("Average whitespace: " + avgWhitespace + " | Estimation: " + estimatedWhiteSpace);
         }
+
 
         /* ------ STAFFLINE REMOVAL ------ */
         ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
@@ -222,13 +227,15 @@ public class MainThread implements Runnable {
         JSONArray json_systems = new JSONArray();
 
         for(int x = 0; x < systems.size(); x++){
-            ArrayList<Objektausschnitt> objectLists = objectsOfSystems.get(x);
+            // Filter some objects out and split possible notes into several ones.
+            ArrayList<Objektausschnitt> objectList = split_notes(filter_non_notes(objectsOfSystems.get(x), estimatedWhiteSpace, estimatedStafflineHeight), estimatedWhiteSpace, estimatedStafflineHeight );
+
             BufferedImage curr_system = ImageConverter.BinaryImageToBuffered(systems.get(x));
             Graphics2D curr_system_graphics = curr_system.createGraphics();
 
             JSONArray json_objectsArray = new JSONArray();
 
-            for(Objektausschnitt object : objectLists){
+            for(Objektausschnitt object : objectList){
                 Point[] bounds = object.getBoundingBox();
                 
                 JSONObject top_left = new JSONObject();
@@ -277,6 +284,88 @@ public class MainThread implements Runnable {
 
         changeCounter(-1);
         System.out.println("Main Thread finished");
+    }
+
+    //Tries to detect connected music notes and cut them into single ones.
+    private ArrayList<Objektausschnitt> split_notes(ArrayList<Objektausschnitt> objects, int whitespace, int staffheight) {
+        ArrayList<Objektausschnitt> return_list = new ArrayList<Objektausschnitt>();
+
+
+        for(Objektausschnitt obj : objects){
+            return_list.add(obj);
+
+            //Probably no multinote
+            if(obj.getWidth() < 3*whitespace){
+                continue;
+            }
+
+            //Split 
+            int[] projection = obj.toHorizontalProjection();
+            int avg = (int)UtilMath.average(projection);
+            ArrayList<SimpleEntry<Integer, Integer>> spikes = new ArrayList<>(); //Entry: x-start, width
+            
+            boolean in_spike = false;
+            for(int x = 0; x < projection.length; x++)
+            {
+                if(projection[x] > 3*avg){
+                    if(in_spike == true)
+                    {
+                        spikes.get(spikes.size()).setValue(spikes.get(spikes.size()).getValue() + 1);
+                    }
+                    else{
+                        in_spike = true;
+                        spikes.add(new SimpleEntry<Integer,Integer>(x, 1));
+                    }
+                }
+                else{
+                    in_spike = false;
+                }
+            }
+
+            if(spikes.size() > 1)
+            {
+                int lastMiddle = 0;
+
+                for(int i = 0; i < spikes.size()-1; i++){
+                    int lows_start = -1;
+                    int lows_width = 0;
+
+                    for(int x = spikes.get(i).getKey() + spikes.get(i).getValue()-1; x <= spikes.get(i+1).getKey(); x++){
+                        if(projection[x] <= avg){
+                            if(lows_start == -1){
+                                lows_start = x;
+                            }
+                            lows_width++;
+                        }
+                    }
+
+                    int middleOfSpikes = lows_start + (lows_width - 1)/2;
+                    Objektausschnitt new_obj = obj.split_at_x_cooordinate(obj.getOffsetXleft() + middleOfSpikes - lastMiddle, false);
+                    return_list.add(new_obj);
+                    lastMiddle = middleOfSpikes;
+                }
+            }
+        }
+
+        return return_list;
+    }
+
+    //Tries to detect non-note symbols and remove them from the resulting list.
+    private ArrayList<Objektausschnitt> filter_non_notes(ArrayList<Objektausschnitt> objects, int whitespace, int staffheight) {
+
+        ArrayList<Objektausschnitt> return_list = new ArrayList<Objektausschnitt>();
+
+        for(Objektausschnitt obj : objects){
+            boolean is_line = obj.getHeight() > (obj.getWidth() * 4);
+            boolean is_g_clef = (obj.getHeight() > (5*whitespace + 5*staffheight)) && (obj.getWidth() > 2*whitespace) && (obj.getWidth() < 3*whitespace);
+            boolean is_not_head = (obj.getHeight() > whitespace+staffheight) && (obj.getHeight() < 2.5*whitespace + 2.5*staffheight);
+
+            if(!is_line && !is_g_clef && !is_not_head){
+                return_list.add(obj);
+            }
+        }
+        
+        return return_list;
     }
 
 }

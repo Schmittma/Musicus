@@ -41,7 +41,7 @@ public class UtilMath {
 
         int avg = 0;
         for(int x = 0; x < values.length; x++) {
-            avg = values[x];
+            avg += values[x];
         }
 
         return (double)avg / (double)values.length;
