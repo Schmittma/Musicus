@@ -7,16 +7,16 @@ Das Kernsystem (in *MainThread*) lässt sich theoretisch unabhängig verwenden.
 
 ## Changelog
 
-24.05.2021 / 1.1:
-    - Einige Objekte werden nun gefiltert und nicht in der bounding box auswertung ausgegeben (Bsp. G-Schlüssel).
-    - Das Programm versucht zusammenhängende Noten in einzelne Noten aufzuspalten. Dies ist nur in der Bounding box auswertung ersichtlich.
+*24.05.2021 / 1.1*:
+- Einige Objekte werden nun gefiltert und nicht in der bounding box auswertung ausgegeben (Bsp. G-Schlüssel).
+- Das Programm versucht zusammenhängende Noten in einzelne Noten aufzuspalten. Dies ist nur in der Bounding box auswertung ersichtlich.
 
-20.05.2021:
-    - Das Programm gibt die bounding boxen der Objekte in einem JSON-Format unter "object_detection/bounding_boxes/bounding_boxes.json" im jeweiligen score aus.
-    - Das Programm legt zu der JSON-Datei auch ein Bild zu jedem System, in welchem diese Bounding boxen noch einmal eingezeichnet sind. Dies kann zum  Verständniss oder der Verifikation verwendet werden.
+*20.05.2021*:
+- Das Programm gibt die bounding boxen der Objekte in einem JSON-Format unter "object_detection/bounding_boxes/bounding_boxes.json" im jeweiligen score aus.
+- Das Programm legt zu der JSON-Datei auch ein Bild zu jedem System, in welchem diese Bounding boxen noch einmal eingezeichnet sind. Dies kann zum  Verständniss oder der Verifikation verwendet werden.
 
-20.05.2021 & 11.05.2021:
-    - Die Meta-Dateien wurden angepasst und die Quelldateien wurden in eine Maven-Konforme struktur gebracht 
+*20.05.2021 & 11.05.2021*:
+- Die Meta-Dateien wurden angepasst und die Quelldateien wurden in eine Maven-Konforme struktur gebracht 
 
 ## Importieren
 
