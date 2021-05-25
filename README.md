@@ -7,7 +7,11 @@ Das Kernsystem (in *MainThread*) lässt sich theoretisch unabhängig verwenden.
 
 ## Changelog
 
-*24.05.2021 / 1.1*:
+*25.05.2021*
+- Fehler in der Notentrennung bei der bounding box auswertung behoben.
+- Standardmäßig wird nun der Clarke Algorithmus zur Notenlinienentfernung verwendet.
+
+*24.05.2021 / Release 1.1*:
 - Einige Objekte werden nun gefiltert und nicht in der bounding box auswertung ausgegeben (Bsp. G-Schlüssel).
 - Das Programm versucht zusammenhängende Noten in einzelne Noten aufzuspalten. Dies ist nur in der Bounding box auswertung ersichtlich.
 

@@ -27,6 +27,9 @@ import main.java.interfaces.StafflineRemoval;
 import main.java.interfaces.SystemDetection;
 import main.java.objectdetection.FloodfillObjectdetection;
 import main.java.stafflinedetection.OrientationStafflineDetection;
+import main.java.stafflineremoval.BellissantStafflineRemoval;
+import main.java.stafflineremoval.ClarkeStafflineRemoval;
+import main.java.stafflineremoval.LinetrackingStafflineRemoval;
 import main.java.stafflineremoval.SimpleStafflineRemoval;
 import main.java.systemdetection.FloodfillSystemDetection;
 import main.java.utils.ImageConverter;
@@ -169,8 +172,8 @@ public class MainThread implements Runnable {
 
         /* ------ STAFFLINE REMOVAL ------ */
         ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
-
-        StafflineRemoval stafflineRemoval = new SimpleStafflineRemoval();
+  
+        StafflineRemoval stafflineRemoval = new LinetrackingStafflineRemoval(stafflineremoval_minimumAngle, stafflineremoval_lengthMul, stafflineremoval_resolution);
         for (int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
             systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
         }
@@ -310,7 +313,7 @@ public class MainThread implements Runnable {
                 if(projection[x] > 3*avg){
                     if(in_spike == true)
                     {
-                        spikes.get(spikes.size()).setValue(spikes.get(spikes.size()).getValue() + 1);
+                        spikes.get(spikes.size() - 1).setValue(spikes.get(spikes.size() - 1).getValue() + 1);
                     }
                     else{
                         in_spike = true;
@@ -359,8 +362,9 @@ public class MainThread implements Runnable {
             boolean is_line = obj.getHeight() > (obj.getWidth() * 4);
             boolean is_g_clef = (obj.getHeight() > (5*whitespace + 5*staffheight)) && (obj.getWidth() > 2*whitespace) && (obj.getWidth() < 3*whitespace);
             boolean is_not_head = (obj.getHeight() > whitespace+staffheight) && (obj.getHeight() < 2.5*whitespace + 2.5*staffheight);
+            boolean is_very_small = (obj.getHeight() < 0.5 * whitespace) && (obj.getWidth() < 0.5 * whitespace);
 
-            if(!is_line && !is_g_clef && !is_not_head){
+            if(!is_line && !is_g_clef && !is_not_head && !is_very_small){
                 return_list.add(obj);
             }
         }
