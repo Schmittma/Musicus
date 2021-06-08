@@ -299,6 +299,7 @@ public class MainThread implements Runnable {
         for(Objektausschnitt obj : objects){
             //Probably no multinote
             if(obj.getWidth() < 3*whitespace){
+                return_list.add(obj);
                 continue;
             }
 
