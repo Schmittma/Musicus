@@ -173,7 +173,9 @@ public class MainThread implements Runnable {
         /* ------ STAFFLINE REMOVAL ------ */
         ArrayList<boolean[][]> systemsWithoutLines = new ArrayList<>();
   
-        StafflineRemoval stafflineRemoval = new LinetrackingStafflineRemoval(stafflineremoval_minimumAngle, stafflineremoval_lengthMul, stafflineremoval_resolution);
+        //StafflineRemoval stafflineRemoval = new LinetrackingStafflineRemoval(stafflineremoval_minimumAngle, stafflineremoval_lengthMul, stafflineremoval_resolution);
+        StafflineRemoval stafflineRemoval = new SimpleStafflineRemoval();
+        
         for (int x = 0; x < systems.size() && x < stafflinesOfSystems.size(); x++) {
             systemsWithoutLines.add(stafflineRemoval.removeStafflines(systems.get(x), stafflinesOfSystems.get(x)));
         }
@@ -295,8 +297,6 @@ public class MainThread implements Runnable {
 
 
         for(Objektausschnitt obj : objects){
-            return_list.add(obj);
-
             //Probably no multinote
             if(obj.getWidth() < 3*whitespace){
                 continue;
@@ -348,6 +348,7 @@ public class MainThread implements Runnable {
                     lastMiddle = middleOfSpikes;
                 }
             }
+            return_list.add(obj);
         }
 
         return return_list;
